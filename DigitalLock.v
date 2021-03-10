@@ -29,6 +29,10 @@ module DigitalLock #(
 	
 ); 
 
+reg [(4*LENGTH_PASSWORD)-1:0] password, temp_password;
+
+localparam ZERO = {((4*LENGTH_PASSWORD)-1){1'b0}};
+
 reg [2:0] state;
 
 localparam UNLOCKED 				= 3'b000;
@@ -37,8 +41,7 @@ localparam CREATE_PASSWORD 	= 3'b010;
 localparam ENTER_PASSWORD 		= 3'b011;
 localparam ERROR 					= 3'b100;
 
-reg [3*LENGTH_PASSWORD:0] password;
-reg [3*LENGTH_PASSWORD:0] temp_password;
+integer key_presses = 0;
 
 
 always @(posedge clock or posedge reset) begin
@@ -61,60 +64,68 @@ always @(posedge clock or posedge reset) begin
 				end
 				
 				locked <= 1'b0;
+				
 			end
 					
 			CREATE_PASSWORD: begin 
+			
+				if (key_presses >= 2*LENGTH_PASSWORD) begin
+				
+					key_presses = 0;
 					
-				integer key_presses = 0;
-						
-				while (key_presses < 3) begin
-					if (|key) begin
-						temp_password <= key << 3*key_presses;
-						key_presses = key_presses + 1;
+					if (temp_password == password) begin
+						state <= LOCKED;
+						locked <= 1'b1;
+					end else begin
+						state <= ERROR;
+						locked <= 1'b0;
+						password <= ZERO;
+		
 					end
-				end
-						
-				key_presses = 0;
-						
-				while (key_presses < 3) begin
-					if (|key) begin
-						password = key << 3*key_presses;
-						key_presses = key_presses + 1;
-					end
-				end
-						
-				if (password == temp_password) begin
-					state <= LOCKED;
-					locked <= 1'b1;
-				end else begin
-					state <= ERROR;
-					locked <= 1'b0;
-				end
-								
+					
+					temp_password <= ZERO;
+					
+				end else if ((|key) && (key_presses < LENGTH_PASSWORD)) begin
+				
+					temp_password <= key << 4*key_presses;
+					key_presses = key_presses + 1;
+				
+				end else if (|key) begin
+				
+					password <= key << 4*(key_presses - LENGTH_PASSWORD);
+					key_presses = key_presses + 1;
+					
+				end		
 			end
 			
 			LOCKED: begin
+				
+				if (key_presses >= LENGTH_PASSWORD) begin
+				
+					key_presses = 0;
 					
-				integer key_presses = 0;
-				
-				while (key_presses < 3) begin
-					if (|key) begin
-						temp_password <= key << 3*key_presses;
-						key_presses = key_presses + 1;
+					if (temp_password == password) begin
+						state <= UNLOCKED;
+						locked <= 1'b0;
+					end else begin
+						state <= ERROR;
+						locked <= 1'b1;
 					end
-				end
+					
+					temp_password <= ZERO;
+					password <= ZERO;
+					
+				end else	if (|key) begin
 				
-				if (temp_password == password) begin
-					state <= UNLOCKED;
-					locked <= 1'b0;
-				end else begin
-					state <= ERROR;
-					locked <= 1'b1;
+					temp_password <= key << 4*key_presses;
+					key_presses = key_presses + 1;
+					
 				end
-				
 			end
 			
 			ERROR: begin
+			
+				key_presses = 0;
 			
 				if (locked) begin
 					state <= LOCKED;
