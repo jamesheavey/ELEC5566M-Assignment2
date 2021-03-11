@@ -7,7 +7,7 @@
  *
  * Description
  * ---------------------------------
- * 5-state mealy state machine 
+ * 5-state Mealy state machine 
  * defining the function of a 
  * digital lock, operating on the 
  * DE1-SoC Board

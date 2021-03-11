@@ -7,7 +7,7 @@
  *
  * Description
  * ------------------------------------------
- * Testbench module for 5-state hybrid state machine 
+ * Testbench module for 5-state Mealy state machine 
  * defining the function of a 
  * digital lock, operating on the 
  * DE1-SoC Board
@@ -46,36 +46,36 @@ DigitalLock #(
 localparam RST_CYCLES = 2;
 localparam MAX_CYCLES = 50;
 
+// Initialise Clock
 initial begin
 	clock = 1'b0;
 end
 
-initial begin
-	reset = 1'b1; //Start in reset.
-	repeat(RST_CYCLES) @(posedge clock); //Wait for a couple of clocks
-	reset = 1'b0;
-	
-end
-
+// Alternate clock every 10ns
 always #10 clock = ~clock;
 
+// Variables
 integer num_cycles = 0;
 integer counter = 0;
 integer alternator = 0;
+integer start = 1;
+
 
 always begin
 
-	num_cycles = num_cycles + 1;
+	// Start in Reset
+	if (start) begin
+		reset = 1'b1;
+		repeat(RST_CYCLES) @(posedge clock);
+		reset = 1'b0;
+		start = 0;
+	end
 	
-	key = 4'd0;
-		
-	repeat(1) @(posedge clock);
-	
+	// UNLOCKED STATE
 	if (!locked && !cp_flag) begin
 	
 		key = 4'd0;
-		
-		repeat(1) @(posedge clock);
+		repeat(1) @(negedge clock);
 		
 		if (cp_flag) begin
 			$display("Error UNLOCKED state changed when no buttons pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
@@ -83,7 +83,7 @@ always begin
 		end 
 		
 		key = 4'd1;
-		repeat(1) @(posedge clock);
+		repeat(1) @(negedge clock);
 		
 		if (!cp_flag) begin
 			$display("Error UNLOCKED state not changed when button pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
@@ -92,23 +92,26 @@ always begin
 		
 	end
 	
-	if (!locked && cp_flag) begin
+	// CREATE PASSWORD STATE
+	else if (!locked && cp_flag) begin
 	
-		
+		key = 4'd0;
+		repeat(1) @(negedge clock);
+	
 		if (!alternator) begin
 			if (counter < 2*PASSWORD_LENGTH) begin
 			
-				key = counter;
-				repeat(1) @(posedge clock);
+				key = counter + 1;
+				repeat(1) @(negedge clock);
 				
 				counter = counter + 1;
 			end else begin
 			
 				key = 4'd0;
-				repeat(1) @(posedge clock);
+				repeat(1) @(negedge clock);
 				
-				if (!cp_flag) begin
-					$display("Error CREATE_PASSWORD state changed when non-identical passwords entered. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
+				if (!error) begin
+					$display("Error CREATE_PASSWORD state not changed to ERROR when non-identical passwords entered. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
 							 key,locked,error,cp_flag,ep_flag);
 				end 
 				
@@ -121,14 +124,15 @@ always begin
 		
 			if (counter < 2*PASSWORD_LENGTH) begin
 			
-				key = 4'd1;
-				repeat(1) @(posedge clock);
+				key = 4'hF;
+				repeat(1) @(negedge clock);
+				
 				counter = counter + 1;
 				
 			end else begin
 			
 				key = 4'd0;
-				repeat(1) @(posedge clock);
+				repeat(1) @(negedge clock);
 				
 				if (cp_flag) begin
 					$display("Error CREATE_PASSWORD state not changed when identical passwords entered. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
@@ -142,10 +146,11 @@ always begin
 		end
 	end
 	
+	// LOCKED STATE
 	else if (locked && !ep_flag) begin
 	
 		key = 4'd0;
-		repeat(1) @(posedge clock);
+		repeat(1) @(negedge clock);
 		
 		if (cp_flag) begin
 			$display("Error LOCKED state changed when no buttons pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
@@ -153,7 +158,7 @@ always begin
 		end 
 		
 		key = 4'd1;
-		repeat(1) @(posedge clock);
+		repeat(1) @(negedge clock);
 		
 		if (!cp_flag) begin
 			$display("Error LOCKED state not changed when button pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
@@ -161,23 +166,27 @@ always begin
 		end
 	end
 	
+	// ENTER PASSWORD STATE
 	else if (locked && ep_flag) begin
+	
+		key = 4'd0;
+		repeat(1) @(negedge clock);
 	
 		if (!alternator) begin
 		
 			if (counter < PASSWORD_LENGTH) begin
 				key = 4'd7;
-				repeat(1) @(posedge clock);
+				repeat(1) @(negedge clock);
 				
 				counter = counter + 1;
 				
 			end else begin
-			
-				key = 4'd0;
-				repeat(1) @(posedge clock);
 				
-				if (!cp_flag) begin
-					$display("Error ENTER_PASSWORD state changed when incorrect password entered. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
+				key = 4'd0;
+				repeat(1) @(negedge clock);
+				
+				if (!error) begin
+					$display("Error ENTER_PASSWORD state not changed to ERROR when incorrect password entered. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
 							 key,locked,error,cp_flag,ep_flag);
 				end 
 				
@@ -190,17 +199,17 @@ always begin
 		
 			if (counter < PASSWORD_LENGTH) begin
 			
-				key = 4'd1;
-				repeat(1) @(posedge clock);
+				key = 4'hF;
+				repeat(1) @(negedge clock);
 				
 				counter = counter + 1;
 				
 			end else begin
-			
-				key = 4'd0;
-				repeat(1) @(posedge clock);
 				
-				if (cp_flag) begin
+				key = 4'd0;
+				repeat(1) @(negedge clock);
+
+				if (ep_flag) begin
 					$display("Error ENTER_PASSWORD state not changed when correct password entered. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
 							 key,locked,error,cp_flag,ep_flag);
 				end
@@ -212,10 +221,11 @@ always begin
 		end
 	end
 	
+	// ERROR STATE
 	else if (error) begin
 	
 		key = 4'd0;
-		repeat(1) @(posedge clock);
+		repeat(1) @(negedge clock);
 		
 		if (!error) begin
 			$display("Error ERROR state changed when no buttons pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
@@ -223,7 +233,7 @@ always begin
 		end 
 		
 		key = 4'd1;
-		repeat(1) @(posedge clock);
+		repeat(1) @(negedge clock);
 		
 		if (error) begin
 			$display("Error ERROR state not changed when button pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
@@ -233,11 +243,21 @@ always begin
 	
 	if (num_cycles == 43) begin
 	
+		counter = 0;
+		alternator = 0;
+	
 		reset = 1;
 		repeat(RST_CYCLES) @(posedge clock);
 		reset = 0;
 		
+		if (error || locked || cp_flag || ep_flag) begin
+			$display("Error FSM not set to UNLOCKED state when reset button pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
+						 key,locked,error,cp_flag,ep_flag);
+		end
+		
 	end
+	
+	num_cycles = num_cycles + 1;
 	
 	$display("Cycle %d",num_cycles);
 		
