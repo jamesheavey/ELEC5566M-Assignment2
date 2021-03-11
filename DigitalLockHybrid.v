@@ -7,16 +7,16 @@
  *
  * Description
  * ---------------------------------
- * 5-state mealy state machine 
+ * 5-state hybrid state machine 
  * defining the function of a 
  * digital lock, operating on the 
  * DE1-SoC Board
  *
  */
 
-module DigitalLock #(
+module DigitalLockHybrid #(
 
-	parameter PASSWORD_LENGTH = 4
+	parameter LENGTH_PASSWORD = 4
 	
 )(
 
@@ -29,9 +29,9 @@ module DigitalLock #(
 	
 ); 
 
-reg [(4*PASSWORD_LENGTH)-1:0] password, temp_password;
+reg [(4*LENGTH_PASSWORD)-1:0] password, temp_password;
 
-localparam RESET_PASSWORD = {((4*PASSWORD_LENGTH)-1){1'b0}};
+localparam ZERO = {((4*LENGTH_PASSWORD)-1){1'b0}};
 
 reg [2:0] state;
 
@@ -44,54 +44,21 @@ localparam	UNLOCKED 			= 3'd0,
 integer key_presses = 0;
 
 
-always @(state) begin
-
-	error <= 1'b0;
-	ep_flag <= 1'b0;
-	cp_flag <= 1'b0;
-
-	case (state)
- 
-		UNLOCKED: begin 
-			locked <= 1'b0;
-		end
-  
-		LOCKED: begin 
-			locked <= 1'b1;
-		end
-		  
-		CREATE_PASSWORD: begin 
-			cp_flag <= 1'b1;
-			locked <= 1'b0;
-		end
-	  
-		ENTER_PASSWORD: begin
-			ep_flag <= 1'b1;
-			locked <= 1'b1;
-		end
-		  
-		ERROR: begin
-			error <= 1'b1;
-		end
-		  
-	endcase
-	 
-end
-
-
 always @(posedge clock or posedge reset) begin
 
 	if (reset) begin
 	  
 		state <= UNLOCKED;
-		password <= RESET_PASSWORD;
-		temp_password <= RESET_PASSWORD;
+		locked <= 1'b0;
+		error <= 1'b0;
 		  
 	end else begin
 	 
 		case (state)
 		  
 			UNLOCKED: begin 
+			
+				error <= 1'b0;
 		
 				if (|key) begin 
 					state <= CREATE_PASSWORD;
@@ -99,30 +66,39 @@ always @(posedge clock or posedge reset) begin
 					state <= UNLOCKED;
 				end
 				
+				locked <= 1'b0;
+				
 			end
 					
 			CREATE_PASSWORD: begin 
 			
-				if (key_presses >= 2*PASSWORD_LENGTH) begin
+				cp_flag <= 1'b1;
+			
+				if (key_presses >= 2*LENGTH_PASSWORD) begin
+				
+					key_presses = 0;
 					
 					if (temp_password == password) begin
 						state <= LOCKED;
+						locked <= 1'b1;
 					end else begin
 						state <= ERROR;
-						password <= RESET_PASSWORD;
+						locked <= 1'b0;
+						password <= ZERO;
+		
 					end
 					
-					temp_password <= RESET_PASSWORD;
-					key_presses = 0;
+					temp_password <= ZERO;
+					cp_flag <= 1'b0;
 					
-				end else if ((|key) && (key_presses < PASSWORD_LENGTH)) begin
+				end else if ((|key) && (key_presses < LENGTH_PASSWORD)) begin
 				
 					temp_password <= key << 4*key_presses;
 					key_presses = key_presses + 1;
 				
 				end else if (|key) begin
 				
-					password <= key << 4*(key_presses - PASSWORD_LENGTH);
+					password <= key << 4*(key_presses - LENGTH_PASSWORD);
 					key_presses = key_presses + 1;
 					
 				end	
@@ -130,6 +106,8 @@ always @(posedge clock or posedge reset) begin
 			end
 			
 			LOCKED: begin
+				
+				error <= 1'b0;
 		
 				if (|key) begin 
 					state <= ENTER_PASSWORD;
@@ -137,21 +115,29 @@ always @(posedge clock or posedge reset) begin
 					state <= LOCKED;
 				end
 				
+				locked <= 1'b1;
+				
 			end
 			
 			ENTER_PASSWORD: begin
 				
-				if (key_presses >= PASSWORD_LENGTH) begin
+				ep_flag <= 1'b1;
+				
+				if (key_presses >= LENGTH_PASSWORD) begin
+				
+					key_presses = 0;
 					
 					if (temp_password == password) begin
 						state <= UNLOCKED;
-						password <= RESET_PASSWORD;
+						locked <= 1'b0;
+						password <= ZERO;
 					end else begin
 						state <= ERROR;
+						locked <= 1'b1;
 					end
 					
-					temp_password <= RESET_PASSWORD;
-					key_presses = 0;
+					temp_password <= ZERO;
+					ep_flag <= 1'b1;
 					
 				end else	if (|key) begin
 				
@@ -164,20 +150,13 @@ always @(posedge clock or posedge reset) begin
 			
 			ERROR: begin
 			
-				if (|key) begin
+				key_presses = 0;
+				error = 1'b1;
 			
-					key_presses = 0;
-				
-					if (locked) begin
-						state <= LOCKED;
-					end else begin
-						state <= UNLOCKED;
-					end
-					
+				if (locked) begin
+					state <= LOCKED;
 				end else begin
-				
-					state <= ERROR;
-					
+					state <= UNLOCKED;
 				end
 				
 			end
