@@ -86,6 +86,7 @@ always @(posedge clock or posedge reset) begin
 		state <= UNLOCKED;
 		password <= RESET_PASSWORD;
 		temp_password <= RESET_PASSWORD;
+		key_presses <= 0;
 		  
 	end else begin
 	 
@@ -113,17 +114,17 @@ always @(posedge clock or posedge reset) begin
 					end
 					
 					temp_password <= RESET_PASSWORD;
-					key_presses = 0;
+					key_presses <= 0;
 					
 				end else if ((|key) && (key_presses < PASSWORD_LENGTH)) begin
 				
 					temp_password <= key << 4*key_presses;
-					key_presses = key_presses + 1;
+					key_presses <= key_presses + 1;
 				
 				end else if (|key) begin
 				
 					password <= key << 4*(key_presses - PASSWORD_LENGTH);
-					key_presses = key_presses + 1;
+					key_presses <= key_presses + 1;
 					
 				end	
 				
@@ -151,12 +152,12 @@ always @(posedge clock or posedge reset) begin
 					end
 					
 					temp_password <= RESET_PASSWORD;
-					key_presses = 0;
+					key_presses <= 0;
 					
 				end else	if (|key) begin
 				
 					temp_password <= key << 4*key_presses;
-					key_presses = key_presses + 1;
+					key_presses <= key_presses + 1;
 					
 				end
 				
@@ -166,7 +167,7 @@ always @(posedge clock or posedge reset) begin
 			
 				if (|key) begin
 			
-					key_presses = 0;
+					key_presses <= 0;
 				
 					if (locked) begin
 						state <= LOCKED;
