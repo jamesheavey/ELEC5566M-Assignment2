@@ -23,7 +23,7 @@ always @(*) begin
 
 	case(hex)
 	
-		4'h0: SevenSeg = 7'b0111111;
+		4'h0: SevenSeg = 7'b0000000;  // no need to represent 0
 		4'h1: SevenSeg = 7'b0000110;
 		4'h2: SevenSeg = 7'b1011011;
 		4'h3: SevenSeg = 7'b1001111;
@@ -32,7 +32,7 @@ always @(*) begin
 		4'h6: SevenSeg = 7'b1111101;
 		4'h7: SevenSeg = 7'b0000111;
 		4'h8: SevenSeg = 7'b1111111;
-		4'h9: SevenSeg = 7'b1100111;	
+		4'h9: SevenSeg = 7'b1100111;
 		4'hA: SevenSeg = 7'b1110111;
 		4'hB: SevenSeg = 7'b1111100;
 		4'hC: SevenSeg = 7'b0111001;
