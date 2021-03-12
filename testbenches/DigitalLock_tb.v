@@ -18,7 +18,8 @@
 
 module DigitalLock_tb;
 
-parameter PASSWORD_LENGTH = 4;
+parameter PASSWORD_LENGTH = 3;
+parameter NUM_DISPLAYS = 6;
 
 reg clock, reset;
 
@@ -26,9 +27,12 @@ reg [3:0] key;
 
 wire locked, error, ep_flag, cp_flag;
 
+wire [(7*NUM_DISPLAYS)-1:0] SevenSeg;
+
 DigitalLock #(
 
-	.PASSWORD_LENGTH	( PASSWORD_LENGTH )
+	.PASSWORD_LENGTH	( PASSWORD_LENGTH ),
+	.NUM_DISPLAYS		( NUM_DISPLAYS )
 	
 ) DigitalLock_dut (
 
@@ -39,7 +43,9 @@ DigitalLock #(
 	.locked				( locked ),
 	.error				( error ),
 	.ep_flag				( ep_flag ),
-	.cp_flag				( cp_flag )
+	.cp_flag				( cp_flag ),
+	
+	.SevenSeg			( SevenSeg )
 	
 );
 
@@ -81,6 +87,9 @@ always begin
 			num_errors = num_errors + 1;
 			
 		end
+		
+		repeat(1) @(negedge clock);
+		
 	end
 	
 	// UNLOCKED STATE
@@ -181,6 +190,7 @@ always begin
 			$display("Error LOCKED state not changed when button pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
 						 key,locked,error,cp_flag,ep_flag);
 			num_errors = num_errors + 1;
+			
 		end
 	end
 	
@@ -236,7 +246,7 @@ always begin
 				
 				counter = 0;
 				alternator = ~alternator;
-				
+
 			end
 		end
 	end
