@@ -25,7 +25,7 @@ reg clock, reset;
 
 reg [3:0] key;
 
-wire locked, error, ep_flag, cp_flag;
+wire lock_flag, error_flag, enter_pwd_flag, create_pwd_flag;
 
 DigitalLockFSM #(
 
@@ -38,10 +38,11 @@ DigitalLockFSM #(
 	.reset				( reset ),
 	
 	.key					( key ),
-	.locked				( locked ),
-	.error				( error ),
-	.ep_flag				( ep_flag ),
-	.cp_flag				( cp_flag )
+	
+	.lock_flag			( lock_flag ),
+	.error_flag			( error_flag ),
+	.enter_pwd_flag	( enter_pwd_flag ),
+	.create_pwd_flag	( create_pwd_flag )
 	
 );
 
@@ -77,39 +78,39 @@ always begin
 		counter = 0;
 		alternator = 0;
 		
-		if (error || locked || cp_flag || ep_flag) begin
-			$display("Error FSM not set to UNLOCKED state when reset button pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
-						 key,locked,error,cp_flag,ep_flag);
+		if (error_flag || lock_flag || create_pwd_flag || enter_pwd_flag) begin
+			$display("Error FSM not set to UNLOCKED state when reset button pressed. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
+						 key,lock_flag,error_flag,create_pwd_flag,enter_pwd_flag);
 			num_errors = num_errors + 1;
 			
 		end
 	end
 	
 	// UNLOCKED STATE
-	if (!error && !locked && !cp_flag && !ep_flag) begin
+	if (!error_flag && !lock_flag && !create_pwd_flag && !enter_pwd_flag) begin
 	
 		key = 4'h0;
 		repeat(1) @(negedge clock);
 		
-		if (cp_flag) begin
-			$display("Error UNLOCKED state changed when no buttons pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
-						 key,locked,error,cp_flag,ep_flag);
+		if (create_pwd_flag) begin
+			$display("Error UNLOCKED state changed when no buttons pressed. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
+						 key,lock_flag,error_flag,create_pwd_flag,enter_pwd_flag);
 			num_errors = num_errors + 1;
 		end 
 		
 		key = 4'h1;
 		repeat(1) @(negedge clock);
 		
-		if (!cp_flag) begin
-			$display("Error UNLOCKED state not changed when button pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
-						 key,locked,error,cp_flag,ep_flag);
+		if (!create_pwd_flag) begin
+			$display("Error UNLOCKED state not changed when button pressed. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
+						 key,lock_flag,error_flag,create_pwd_flag,enter_pwd_flag);
 			num_errors = num_errors + 1;
 			
 		end
 	end
 	
 	// CREATE PASSWORD STATE
-	else if (!error && !locked && cp_flag && !ep_flag) begin
+	else if (!error_flag && !lock_flag && create_pwd_flag && !enter_pwd_flag) begin
 	
 		key = 4'h0;
 		repeat(1) @(negedge clock);
@@ -126,9 +127,9 @@ always begin
 				key = 4'h0;
 				repeat(1) @(negedge clock);
 				
-				if (!error) begin
-					$display("Error CREATE_PASSWORD state not changed to ERROR when non-identical passwords entered. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
-							 key,locked,error,cp_flag,ep_flag);
+				if (!error_flag) begin
+					$display("Error CREATE_PASSWORD state not changed to ERROR when non-identical passwords entered. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
+							 key,lock_flag,error_flag,create_pwd_flag,enter_pwd_flag);
 					num_errors = num_errors + 1;
 				end 
 				
@@ -151,9 +152,9 @@ always begin
 				key = 4'h0;
 				repeat(1) @(negedge clock);
 				
-				if (cp_flag) begin
-					$display("Error CREATE_PASSWORD state not changed when identical passwords entered. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
-							 key,locked,error,cp_flag,ep_flag);
+				if (create_pwd_flag) begin
+					$display("Error CREATE_PASSWORD state not changed when identical passwords entered. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
+							 key,lock_flag,error_flag,create_pwd_flag,enter_pwd_flag);
 					num_errors = num_errors + 1;
 				end 
 				
@@ -165,29 +166,29 @@ always begin
 	end
 	
 	// LOCKED STATE
-	else if (!error && locked && !cp_flag && !ep_flag) begin
+	else if (!error_flag && lock_flag && !create_pwd_flag && !enter_pwd_flag) begin
 	
 		key = 4'h0;
 		repeat(1) @(negedge clock);
 		
-		if (ep_flag) begin
-			$display("Error LOCKED state changed when no buttons pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
-						 key,locked,error,cp_flag,ep_flag);
+		if (enter_pwd_flag) begin
+			$display("Error LOCKED state changed when no buttons pressed. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
+						 key,lock_flag,error_flag,create_pwd_flag,enter_pwd_flag);
 			num_errors = num_errors + 1;
 		end 
 		
 		key = 4'h1;
 		repeat(1) @(negedge clock);
 		
-		if (!ep_flag) begin
-			$display("Error LOCKED state not changed when button pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
-						 key,locked,error,cp_flag,ep_flag);
+		if (!enter_pwd_flag) begin
+			$display("Error LOCKED state not changed when button pressed. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
+						 key,lock_flag,error_flag,create_pwd_flag,enter_pwd_flag);
 			num_errors = num_errors + 1;
 		end
 	end
 	
 	// ENTER PASSWORD STATE
-	else if (!error && locked && !cp_flag && ep_flag) begin
+	else if (!error_flag && lock_flag && !create_pwd_flag && enter_pwd_flag) begin
 	
 		key = 4'h0;
 		repeat(1) @(negedge clock);
@@ -205,9 +206,9 @@ always begin
 				key = 4'h0;
 				repeat(1) @(negedge clock);
 				
-				if (!error) begin
-					$display("Error ENTER_PASSWORD state not changed to ERROR when incorrect password entered. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
-							 key,locked,error,cp_flag,ep_flag);
+				if (!error_flag) begin
+					$display("Error ENTER_PASSWORD state not changed to ERROR when incorrect password entered. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
+							 key,lock_flag,error_flag,create_pwd_flag,enter_pwd_flag);
 					num_errors = num_errors + 1;
 				end 
 				
@@ -230,9 +231,9 @@ always begin
 				key = 4'h0;
 				repeat(1) @(negedge clock);
 
-				if (ep_flag) begin
-					$display("Error ENTER_PASSWORD state not changed when correct password entered. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
-							 key,locked,error,cp_flag,ep_flag);
+				if (enter_pwd_flag) begin
+					$display("Error ENTER_PASSWORD state not changed when correct password entered. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
+							 key,lock_flag,error_flag,create_pwd_flag,enter_pwd_flag);
 					num_errors = num_errors + 1;
 				end
 				
@@ -244,23 +245,23 @@ always begin
 	end
 	
 	// ERROR STATE
-	else if (error) begin
+	else if (error_flag) begin
 	
 		key = 4'h0;
 		repeat(1) @(negedge clock);
 		
-		if (!error) begin
-			$display("Error ERROR state changed when no buttons pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
-						 key,locked,error,cp_flag,ep_flag);
+		if (!error_flag) begin
+			$display("Error ERROR state changed when no buttons pressed. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
+						 key,lock_flag,error_flag,create_pwd_flag,enter_pwd_flag);
 			num_errors = num_errors + 1;
 		end 
 		
 		key = 4'h1;
 		repeat(1) @(negedge clock);
 		
-		if (error) begin
-			$display("Error ERROR state not changed when button pressed. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
-						 key,locked,error,cp_flag,ep_flag);
+		if (error_flag) begin
+			$display("Error ERROR state not changed when button pressed. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
+						 key,lock_flag,error_flag,create_pwd_flag,enter_pwd_flag);
 			num_errors = num_errors + 1;
 		end
 	end
@@ -279,9 +280,9 @@ always begin
 	
 		repeat(2*MAX_IDLE+1) @(posedge clock);
 		
-		if (!error) begin
-			$display("Error state not changed to ERROR when idle limit exceeded. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
-						 key,locked,error,cp_flag,ep_flag);
+		if (!error_flag) begin
+			$display("Error state not changed to ERROR when idle limit exceeded. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
+						 key,lock_flag,error_flag,create_pwd_flag,enter_pwd_flag);
 			num_errors = num_errors + 1;
 		end
 			

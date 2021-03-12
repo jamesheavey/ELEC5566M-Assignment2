@@ -23,8 +23,7 @@ module DigitalLock #(
 
 	input [3:0] key,
 	
-	// add 7seg/LED outputs instead of enter and create password flags
-	output locked, error, ep_flag, cp_flag,
+	output LED1, LED2, LED3, LED4,
 	
 	output [(7*NUM_DISPLAYS)-1:0] SevenSeg
 	
@@ -56,10 +55,10 @@ DigitalLockFSM #(
 	
 	.key					( filtered_key ),
 	
-	.locked				( locked ),
-	.error				( error ),
-	.ep_flag				( ep_flag ),
-	.cp_flag				( cp_flag ),
+	.lock_flag			( LED1 ),
+	.error_flag			( LED2 ),
+	.enter_pwd_flag	( LED3 ),
+	.create_pwd_flag	( LED4 ),
 	
 	.display_digits	( display_digits )
 );

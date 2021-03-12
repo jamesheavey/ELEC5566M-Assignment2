@@ -26,8 +26,7 @@ module DigitalLockFSM #(
 
 	input [3:0] key,
 	
-	// add 7seg/LED outputs instead of enter and create password flags
-	output reg locked, error, ep_flag, cp_flag,
+	output reg lock_flag, error_flag, enter_pwd_flag, create_pwd_flag,
 	
 	output reg [(NUM_DISPLAYS*4)-1:0] display_digits
 	
@@ -51,32 +50,32 @@ integer idle_counter = 0;
 
 always @(state) begin
 
-	error = 1'b0;
-	ep_flag = 1'b0;
-	cp_flag = 1'b0;
+	error_flag = 1'b0;
+	enter_pwd_flag = 1'b0;
+	create_pwd_flag = 1'b0;
 
 	case (state)
  
 		UNLOCKED: begin 
-			locked = 1'b0;
+			lock_flag = 1'b0;
 		end
   
 		LOCKED: begin 
-			locked = 1'b1;
+			lock_flag = 1'b1;
 		end
 		  
 		CREATE_PASSWORD: begin 
-			cp_flag = 1'b1;
-			locked = 1'b0;
+			create_pwd_flag = 1'b1;
+			lock_flag = 1'b0;
 		end
 	  
 		ENTER_PASSWORD: begin
-			ep_flag = 1'b1;
-			locked = 1'b1;			
+			enter_pwd_flag = 1'b1;
+			lock_flag = 1'b1;			
 		end
 		  
 		ERROR: begin
-			error = 1'b1;
+			error_flag = 1'b1;
 		end
 		  
 	endcase
@@ -203,7 +202,7 @@ always @(posedge clock or posedge reset) begin
 			
 					key_presses <= 0;
 				
-					if (locked) begin
+					if (lock_flag) begin
 						state <= LOCKED;
 					end else begin
 						state <= UNLOCKED;

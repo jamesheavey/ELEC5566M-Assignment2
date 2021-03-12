@@ -64,7 +64,6 @@ set_global_assignment -name EDA_TEST_BENCH_NAME DigitalLockFSM_tb -section_id ed
 set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id DigitalLockFSM_tb
 set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME DigitalLockFSM_tb -section_id DigitalLockFSM_tb
 set_global_assignment -name VERILOG_FILE PasswordTo7Seg.v
-set_global_assignment -name VERILOG_FILE FlagsToLED.v
 set_global_assignment -name VERILOG_FILE KeyPressFilter.v
 set_global_assignment -name EDA_TEST_BENCH_NAME KeyPressFilter_tb -section_id eda_simulation
 set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id KeyPressFilter_tb
