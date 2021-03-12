@@ -18,7 +18,7 @@
 
 module DigitalLock_tb;
 
-parameter PASSWORD_LENGTH = 4;
+parameter PASSWORD_LENGTH = 5;
 
 reg clock, reset;
 
