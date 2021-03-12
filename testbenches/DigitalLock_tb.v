@@ -18,7 +18,7 @@
 
 module DigitalLock_tb;
 
-parameter PASSWORD_LENGTH = 3;
+parameter PASSWORD_LENGTH = 4;
 parameter NUM_DISPLAYS = 6;
 
 reg clock, reset;

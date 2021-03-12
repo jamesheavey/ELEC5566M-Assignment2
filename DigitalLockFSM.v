@@ -92,7 +92,7 @@ always @(posedge clock or posedge reset) begin
 		temp_password <= RESET_PASSWORD;
 		key_presses <= 0;
 		idle_counter <= 0;
-		display_digits <= {(NUM_DISPLAYS*4){1'bx}};
+		display_digits <= {(NUM_DISPLAYS*4){1'b0}};
 		  
 	end else if (idle_counter == MAX_IDLE) begin
 		
@@ -105,7 +105,7 @@ always @(posedge clock or posedge reset) begin
 		  
 			UNLOCKED: begin 
 				
-				display_digits <= {(NUM_DISPLAYS*4){1'bx}};
+				display_digits <= {(NUM_DISPLAYS*4){1'b0}};
 		
 				if (|key) begin 
 				
@@ -146,7 +146,7 @@ always @(posedge clock or posedge reset) begin
 					key_presses <= key_presses + 1;
 					password[(4*PASSWORD_LENGTH)-1 - (4*(key_presses-PASSWORD_LENGTH)) -: 4] <= key;
 					
-					display_digits <= password >> 4*key_presses;
+					display_digits <= password >> 4*(2*PASSWORD_LENGTH - key_presses);
 					
 				end else begin
 					idle_counter <= idle_counter + 1;
@@ -156,7 +156,7 @@ always @(posedge clock or posedge reset) begin
 			
 			LOCKED: begin
 				
-				display_digits <= {(NUM_DISPLAYS*4){1'bx}}; // Display Nothing
+				display_digits <= {(NUM_DISPLAYS*4){1'b0}}; // Display Nothing
 		
 				if (|key) begin 
 					state <= ENTER_PASSWORD;
