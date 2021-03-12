@@ -13,11 +13,14 @@
  */
  
 module HexTo7Segment ( 
+
 	input			[3:0] hex, 
 	output reg	[6:0] SevenSeg
+	
 );
 
-always @ * begin
+always @(*) begin
+
 	case(hex)
 	
 		4'h0: SevenSeg = 7'b0111111;

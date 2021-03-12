@@ -95,12 +95,16 @@ always @(posedge clock or posedge reset) begin
 			UNLOCKED: begin 
 		
 				if (|key) begin 
-					state <= CREATE_PASSWORD;
-				end else begin
-					state <= UNLOCKED;
-				end
 				
+					state <= CREATE_PASSWORD;
+					
+				end else begin
+				
+					state <= UNLOCKED;
+					
+				end
 			end
+			
 					
 			CREATE_PASSWORD: begin 
 			
@@ -118,17 +122,17 @@ always @(posedge clock or posedge reset) begin
 					
 				end else if ((|key) && (key_presses < PASSWORD_LENGTH)) begin
 				
-					temp_password <= key << 4*key_presses;
 					key_presses <= key_presses + 1;
+					temp_password[(4*PASSWORD_LENGTH)-1 - (4*key_presses) -: 4] <= key; // Does Password MSB first (easier to display on 7 Seg)
 				
 				end else if (|key) begin
-				
-					password <= key << 4*(key_presses - PASSWORD_LENGTH);
+					
 					key_presses <= key_presses + 1;
+					password[(4*PASSWORD_LENGTH)-1 - (4*(key_presses-PASSWORD_LENGTH)) -: 4] <= key;
 					
 				end	
-				
 			end
+			
 			
 			LOCKED: begin
 		
@@ -137,8 +141,8 @@ always @(posedge clock or posedge reset) begin
 				end else begin
 					state <= LOCKED;
 				end
-				
 			end
+			
 			
 			ENTER_PASSWORD: begin
 				
@@ -156,12 +160,12 @@ always @(posedge clock or posedge reset) begin
 					
 				end else	if (|key) begin
 				
-					temp_password <= key << 4*key_presses;
+					temp_password[(4*PASSWORD_LENGTH)-1 - (4*key_presses) -: 4] <= key;
 					key_presses <= key_presses + 1;
 					
 				end
-				
 			end
+			
 			
 			ERROR: begin
 			
@@ -180,8 +184,8 @@ always @(posedge clock or posedge reset) begin
 					state <= ERROR;
 					
 				end
-				
 			end
+			
 					
 			default: begin
 				state <= UNLOCKED;
