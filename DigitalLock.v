@@ -23,7 +23,7 @@ module DigitalLock #(
 
 	input [3:0] key,
 	
-	output LED1, LED2, LED3, LED4,
+	output LED1, LED2, LED3, LED4, LED_Reset,
 	
 	output [(7*NUM_DISPLAYS)-1:0] SevenSeg
 	
@@ -75,5 +75,7 @@ PasswordTo7Seg #(
 	.SevenSeg			( SevenSeg )
 
 );
+
+assign LED_Reset = reset;
 
 endmodule
