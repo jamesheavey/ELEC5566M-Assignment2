@@ -1,13 +1,13 @@
 /*
  * ELEC5566 Assignment 2:
- * Digital Lock Finite Top-level Testbench
+ * Digital Lock Finite State Machine Testbench
  * ------------------------------------------
  * For: University of Leeds
  * Date: 10/3/2021
  *
  * Description
  * ------------------------------------------
- * Testbench module Top level file 
+ * Testbench module for 5-state Mealy state machine 
  * defining the function of a 
  * digital lock, operating on the 
  * DE1-SoC Board
@@ -16,7 +16,7 @@
                                                       
 `timescale 1 ns/100 ps
 
-module DigitalLock_tb;
+module DigitalLockFSM_tb;
 
 parameter PASSWORD_LENGTH = 4;
 
@@ -26,11 +26,11 @@ reg [3:0] key;
 
 wire locked, error, ep_flag, cp_flag;
 
-DigitalLock #(
+DigitalLockFSM #(
 
 	.PASSWORD_LENGTH	( PASSWORD_LENGTH )
 	
-) DigitalLock_dut (
+) DigitalLockFSM_dut (
 
 	.clock				( clock ),
 	.reset				( reset ),
