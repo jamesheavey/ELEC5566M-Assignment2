@@ -38,6 +38,7 @@ DigitalLockFSM #(
 	.reset				( reset ),
 	
 	.key					( key ),
+	
 	.locked				( locked ),
 	.error				( error ),
 	.ep_flag				( ep_flag ),

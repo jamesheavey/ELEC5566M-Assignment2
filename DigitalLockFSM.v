@@ -46,32 +46,32 @@ integer key_presses = 0;
 
 always @(state) begin
 
-	error <= 1'b0;
-	ep_flag <= 1'b0;
-	cp_flag <= 1'b0;
+	error = 1'b0;
+	ep_flag = 1'b0;
+	cp_flag = 1'b0;
 
 	case (state)
  
 		UNLOCKED: begin 
-			locked <= 1'b0;
+			locked = 1'b0;
 		end
   
 		LOCKED: begin 
-			locked <= 1'b1;
+			locked = 1'b1;
 		end
 		  
 		CREATE_PASSWORD: begin 
-			cp_flag <= 1'b1;
-			locked <= 1'b0;
+			cp_flag = 1'b1;
+			locked = 1'b0;
 		end
 	  
 		ENTER_PASSWORD: begin
-			ep_flag <= 1'b1;
-			locked <= 1'b1;
+			ep_flag = 1'b1;
+			locked = 1'b1;
 		end
 		  
 		ERROR: begin
-			error <= 1'b1;
+			error = 1'b1;
 		end
 		  
 	endcase
