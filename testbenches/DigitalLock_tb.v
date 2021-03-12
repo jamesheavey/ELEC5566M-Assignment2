@@ -1,6 +1,6 @@
 /*
  * ELEC5566 Assignment 2:
- * Digital Lock Finite Top-level Testbench
+ * Digital Lock Top-level Testbench
  * ------------------------------------------
  * For: University of Leeds
  * Date: 10/3/2021
