@@ -17,6 +17,7 @@
 module DigitalLockFSM #(
 
 	parameter PASSWORD_LENGTH = 4,
+	parameter NUM_DISPLAYS = 6,
 	parameter MAX_IDLE = 500000
 	
 )(
@@ -26,7 +27,9 @@ module DigitalLockFSM #(
 	input [3:0] key,
 	
 	// add 7seg/LED outputs instead of enter and create password flags
-	output reg locked, error, ep_flag, cp_flag
+	output reg locked, error, ep_flag, cp_flag,
+	
+	output reg [(NUM_DISPLAYS*4)-1:0] display_digits
 	
 ); 
 
@@ -69,7 +72,7 @@ always @(state) begin
 	  
 		ENTER_PASSWORD: begin
 			ep_flag = 1'b1;
-			locked = 1'b1;
+			locked = 1'b1;			
 		end
 		  
 		ERROR: begin
@@ -90,6 +93,7 @@ always @(posedge clock or posedge reset) begin
 		temp_password <= RESET_PASSWORD;
 		key_presses <= 0;
 		idle_counter <= 0;
+		display_digits <= {(NUM_DISPLAYS*4){1'bx}};
 		  
 	end else if (idle_counter == MAX_IDLE) begin
 		
@@ -101,6 +105,8 @@ always @(posedge clock or posedge reset) begin
 		case (state)
 		  
 			UNLOCKED: begin 
+				
+				display_digits <= {(NUM_DISPLAYS*4){1'bx}};
 		
 				if (|key) begin 
 				
@@ -133,11 +139,15 @@ always @(posedge clock or posedge reset) begin
 				
 					key_presses <= key_presses + 1;
 					temp_password[(4*PASSWORD_LENGTH)-1 - (4*key_presses) -: 4] <= key; // Does Password MSB first (easier to display on 7 Seg)
+					
+					display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
 				
 				end else if (|key) begin
 					
 					key_presses <= key_presses + 1;
 					password[(4*PASSWORD_LENGTH)-1 - (4*(key_presses-PASSWORD_LENGTH)) -: 4] <= key;
+					
+					display_digits <= password >> 4*key_presses;
 					
 				end else begin
 					idle_counter <= idle_counter + 1;
@@ -146,6 +156,8 @@ always @(posedge clock or posedge reset) begin
 			
 			
 			LOCKED: begin
+				
+				display_digits <= {(NUM_DISPLAYS*4){1'bx}}; // Display Nothing
 		
 				if (|key) begin 
 					state <= ENTER_PASSWORD;
@@ -175,6 +187,8 @@ always @(posedge clock or posedge reset) begin
 					temp_password[(4*PASSWORD_LENGTH)-1 - (4*key_presses) -: 4] <= key;
 					key_presses <= key_presses + 1;
 					
+					display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
+					
 				end else begin
 					idle_counter <= idle_counter + 1;
 				end
@@ -182,6 +196,8 @@ always @(posedge clock or posedge reset) begin
 			
 			
 			ERROR: begin
+				
+				display_digits <= {(PASSWORD_LENGTH){4'hE}};  // Display 'E' for ERROR
 			
 				if (|key) begin
 			
