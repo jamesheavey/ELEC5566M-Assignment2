@@ -16,7 +16,8 @@
 
 module DigitalLockFSM #(
 
-	parameter PASSWORD_LENGTH = 4
+	parameter PASSWORD_LENGTH = 4,
+	parameter MAX_IDLE = 500000
 	
 )(
 
@@ -42,6 +43,7 @@ localparam	UNLOCKED 			= 3'd0,
 				ERROR 				= 3'd4;
 
 integer key_presses = 0;
+integer idle_counter = 0;
 
 
 always @(state) begin
@@ -87,7 +89,13 @@ always @(posedge clock or posedge reset) begin
 		password <= RESET_PASSWORD;
 		temp_password <= RESET_PASSWORD;
 		key_presses <= 0;
+		idle_counter <= 0;
 		  
+	end else if (idle_counter == MAX_IDLE) begin
+		
+		state <= ERROR;
+		idle_counter <= 0;
+		
 	end else begin
 	 
 		case (state)
@@ -119,6 +127,7 @@ always @(posedge clock or posedge reset) begin
 					
 					temp_password <= RESET_PASSWORD;
 					key_presses <= 0;
+					idle_counter <= 0;
 					
 				end else if ((|key) && (key_presses < PASSWORD_LENGTH)) begin
 				
@@ -130,6 +139,8 @@ always @(posedge clock or posedge reset) begin
 					key_presses <= key_presses + 1;
 					password[(4*PASSWORD_LENGTH)-1 - (4*(key_presses-PASSWORD_LENGTH)) -: 4] <= key;
 					
+				end else begin
+					idle_counter <= idle_counter + 1;
 				end	
 			end
 			
@@ -157,12 +168,15 @@ always @(posedge clock or posedge reset) begin
 					
 					temp_password <= RESET_PASSWORD;
 					key_presses <= 0;
+					idle_counter <= 0;
 					
 				end else	if (|key) begin
 				
 					temp_password[(4*PASSWORD_LENGTH)-1 - (4*key_presses) -: 4] <= key;
 					key_presses <= key_presses + 1;
 					
+				end else begin
+					idle_counter <= idle_counter + 1;
 				end
 			end
 			

@@ -19,6 +19,7 @@
 module DigitalLockFSM_tb;
 
 parameter PASSWORD_LENGTH = 4;
+parameter MAX_IDLE = 50;
 
 reg clock, reset;
 
@@ -28,7 +29,8 @@ wire locked, error, ep_flag, cp_flag;
 
 DigitalLockFSM #(
 
-	.PASSWORD_LENGTH	( PASSWORD_LENGTH )
+	.PASSWORD_LENGTH	( PASSWORD_LENGTH ),
+	.MAX_IDLE			( MAX_IDLE )
 	
 ) DigitalLockFSM_dut (
 
@@ -272,6 +274,17 @@ always begin
 	$display("Cycle %d",num_cycles);
 		
 	if (num_cycles == 2*(MAX_CYCLES)) begin
+		
+		key = 4'h0;
+	
+		repeat(2*MAX_IDLE+1) @(posedge clock);
+		
+		if (!error) begin
+			$display("Error state not changed to ERROR when idle limit exceeded. Inputs: key=%b. Outputs: locked=%b, error=%b, cp_flag=%b, ep_flag=%b.",
+						 key,locked,error,cp_flag,ep_flag);
+			num_errors = num_errors + 1;
+		end
+			
 		$display("TOTAL ERRORS = %d",num_errors);
 		$stop;
 	end

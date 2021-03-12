@@ -27,6 +27,18 @@ module DigitalLock #(
 	
 ); 
 
+wire [3:0] filtered_key;
+
+KeyPressFilter Filter (
+	
+	.clock				( clock ),
+	
+	.key					( key ),
+	
+	.posedge_key		( filtered_key )
+
+);
+
 
 DigitalLockFSM #(
 
@@ -37,7 +49,7 @@ DigitalLockFSM #(
 	.clock				( clock ),
 	.reset				( reset ),
 	
-	.key					( key ),
+	.key					( filtered_key ),
 	
 	.locked				( locked ),
 	.error				( error ),
