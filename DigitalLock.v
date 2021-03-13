@@ -23,7 +23,7 @@ module DigitalLock #(
 
 	input [3:0] key,
 	
-	output LED1, LED2, LED3, LED4, LED_Reset,
+	output LED_locked, LED_error, LED_ep, LED_cp, LED_unlocked, LED_reset,
 	
 	output [(7*NUM_DISPLAYS)-1:0] SevenSeg
 	
@@ -55,10 +55,10 @@ DigitalLockFSM #(
 	
 	.key					( filtered_key ),
 	
-	.lock_flag			( LED1 ),
-	.error_flag			( LED2 ),
-	.enter_pwd_flag	( LED3 ),
-	.create_pwd_flag	( LED4 ),
+	.lock_flag			( LED_locked ),
+	.error_flag			( LED_error ),
+	.enter_pwd_flag	( LED_ep ),
+	.create_pwd_flag	( LED_cp ),
 	
 	.display_digits	( display_digits )
 );
@@ -76,6 +76,7 @@ PasswordTo7Seg #(
 
 );
 
-assign LED_Reset = reset;
+assign LED_unlocked = ~ LED_locked;
+assign LED_reset = reset;
 
 endmodule

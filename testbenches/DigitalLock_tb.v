@@ -25,7 +25,7 @@ reg clock, reset;
 
 reg [3:0] key;
 
-wire LED1, LED2, LED3, LED4;
+wire LED_locked, LED_error, LED_ep, LED_cp, LED_unlocked, LED_reset;
 
 wire [(7*NUM_DISPLAYS)-1:0] SevenSeg;
 
@@ -41,10 +41,12 @@ DigitalLock #(
 	
 	.key					( key ),
 	
-	.LED1					( LED1 ),
-	.LED2					( LED2 ),
-	.LED3					( LED3 ),
-	.LED4					( LED4 ),
+	.LED_locked			( LED_locked ),
+	.LED_error			( LED_error ),
+	.LED_ep				( LED_ep ),
+	.LED_cp				( LED_cp ),
+	.LED_unlocked		( LED_unlocked ),
+	.LED_reset			( LED_reset ),
 	
 	.SevenSeg			( SevenSeg )
 	
@@ -82,9 +84,9 @@ always begin
 		counter = 0;
 		alternator = 0;
 		
-		if (LED2 || LED1 || LED4 || LED3) begin
-			$display("Error FSM not set to UNLED1 state when reset button pressed. Inputs: key=%b. Outputs: LED1=%b, LED2=%b, LED4=%b, LED3=%b.",
-						 key,LED1,LED2,LED4,LED3);
+		if (LED_error || LED_locked || LED_cp || LED_ep) begin
+			$display("Error FSM not set to UNLED1 state when reset button pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+						 key,LED_locked,LED_error,LED_cp,LED_ep);
 			num_errors = num_errors + 1;
 			
 		end
@@ -94,30 +96,30 @@ always begin
 	end
 	
 	// UNLOCKED STATE
-	if (!LED2 && !LED1 && !LED4 && !LED3) begin
+	if (!LED_error && !LED_locked && !LED_cp && !LED_ep) begin
 	
 		key = 4'h0;
 		repeat(1) @(negedge clock);
 		
-		if (LED4) begin
-			$display("Error UNLED1 state changed when no buttons pressed. Inputs: key=%b. Outputs: LED1=%b, LED2=%b, LED4=%b, LED3=%b.",
-						 key,LED1,LED2,LED4,LED3);
+		if (LED_cp) begin
+			$display("Error UNLED1 state changed when no buttons pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+						 key,LED_locked,LED_error,LED_cp,LED_ep);
 			num_errors = num_errors + 1;
 		end 
 		
 		key = 4'h1;
 		repeat(1) @(negedge clock);
 		
-		if (!LED4) begin
-			$display("Error UNLED1 state not changed when button pressed. Inputs: key=%b. Outputs: LED1=%b, LED2=%b, LED4=%b, LED3=%b.",
-						 key,LED1,LED2,LED4,LED3);
+		if (!LED_cp) begin
+			$display("Error UNLED1 state not changed when button pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+						 key,LED_locked,LED_error,LED_cp,LED_ep);
 			num_errors = num_errors + 1;
 			
 		end
 	end
 	
 	// CREATE PASSWORD STATE
-	else if (!LED2 && !LED1 && LED4 && !LED3) begin
+	else if (!LED_error && !LED_locked && LED_cp && !LED_ep) begin
 	
 		key = 4'h0;
 		repeat(1) @(negedge clock);
@@ -134,9 +136,9 @@ always begin
 				key = 4'h0;
 				repeat(1) @(negedge clock);
 				
-				if (!LED2) begin
-					$display("Error CREATE_PASSWORD state not changed to ERROR when non-identical passwords entered. Inputs: key=%b. Outputs: LED1=%b, LED2=%b, LED4=%b, LED3=%b.",
-							 key,LED1,LED2,LED4,LED3);
+				if (!LED_error) begin
+					$display("Error CREATE_PASSWORD state not changed to ERROR when non-identical passwords entered. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+							 key,LED_locked,LED_error,LED_cp,LED_ep);
 					num_errors = num_errors + 1;
 				end 
 				
@@ -159,9 +161,9 @@ always begin
 				key = 4'h0;
 				repeat(1) @(negedge clock);
 				
-				if (LED4) begin
-					$display("Error CREATE_PASSWORD state not changed when identical passwords entered. Inputs: key=%b. Outputs: LED1=%b, LED2=%b, LED4=%b, LED3=%b.",
-							 key,LED1,LED2,LED4,LED3);
+				if (LED_cp) begin
+					$display("Error CREATE_PASSWORD state not changed when identical passwords entered. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+							 key,LED_locked,LED_error,LED_cp,LED_ep);
 					num_errors = num_errors + 1;
 				end 
 				
@@ -173,30 +175,30 @@ always begin
 	end
 	
 	// LOCKED STATE
-	else if (!LED2 && LED1 && !LED4 && !LED3) begin
+	else if (!LED_error && LED_locked && !LED_cp && !LED_ep) begin
 	
 		key = 4'h0;
 		repeat(1) @(negedge clock);
 		
-		if (LED3) begin
-			$display("Error LED1 state changed when no buttons pressed. Inputs: key=%b. Outputs: LED1=%b, LED2=%b, LED4=%b, LED3=%b.",
-						 key,LED1,LED2,LED4,LED3);
+		if (LED_ep) begin
+			$display("Error LED_locked state changed when no buttons pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+						 key,LED_locked,LED_error,LED_cp,LED_ep);
 			num_errors = num_errors + 1;
 		end 
 		
 		key = 4'h1;
 		repeat(1) @(negedge clock);
 		
-		if (!LED3) begin
-			$display("Error LED1 state not changed when button pressed. Inputs: key=%b. Outputs: LED1=%b, LED2=%b, LED4=%b, LED3=%b.",
-						 key,LED1,LED2,LED4,LED3);
+		if (!LED_ep) begin
+			$display("Error LED_locked state not changed when button pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+						 key,LED_locked,LED_error,LED_cp,LED_ep);
 			num_errors = num_errors + 1;
 			
 		end
 	end
 	
 	// ENTER PASSWORD STATE
-	else if (!LED2 && LED1 && !LED4 && LED3) begin
+	else if (!LED_error && LED_locked && !LED_cp && LED_ep) begin
 	
 		key = 4'h0;
 		repeat(1) @(negedge clock);
@@ -214,9 +216,9 @@ always begin
 				key = 4'h0;
 				repeat(1) @(negedge clock);
 				
-				if (!LED2) begin
-					$display("Error ENTER_PASSWORD state not changed to ERROR when incorrect password entered. Inputs: key=%b. Outputs: LED1=%b, LED2=%b, LED4=%b, LED3=%b.",
-							 key,LED1,LED2,LED4,LED3);
+				if (!LED_error) begin
+					$display("Error ENTER_PASSWORD state not changed to ERROR when incorrect password entered. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+							 key,LED_locked,LED_error,LED_cp,LED_ep);
 					num_errors = num_errors + 1;
 				end 
 				
@@ -239,9 +241,9 @@ always begin
 				key = 4'h0;
 				repeat(1) @(negedge clock);
 
-				if (LED3) begin
-					$display("Error ENTER_PASSWORD state not changed when correct password entered. Inputs: key=%b. Outputs: LED1=%b, LED2=%b, LED4=%b, LED3=%b.",
-							 key,LED1,LED2,LED4,LED3);
+				if (LED_ep) begin
+					$display("Error ENTER_PASSWORD state not changed when correct password entered. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+							 key,LED_locked,LED_error,LED_cp,LED_ep);
 					num_errors = num_errors + 1;
 				end
 				
@@ -253,23 +255,23 @@ always begin
 	end
 	
 	// ERROR STATE
-	else if (LED2) begin
+	else if (LED_error) begin
 	
 		key = 4'h0;
 		repeat(1) @(negedge clock);
 		
-		if (!LED2) begin
-			$display("Error ERROR state changed when no buttons pressed. Inputs: key=%b. Outputs: LED1=%b, LED2=%b, LED4=%b, LED3=%b.",
-						 key,LED1,LED2,LED4,LED3);
+		if (!LED_error) begin
+			$display("Error ERROR state changed when no buttons pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+						 key,LED_locked,LED_error,LED_cp,LED_ep);
 			num_errors = num_errors + 1;
 		end 
 		
 		key = 4'h1;
 		repeat(1) @(negedge clock);
 		
-		if (LED2) begin
-			$display("Error ERROR state not changed when button pressed. Inputs: key=%b. Outputs: LED1=%b, LED2=%b, LED4=%b, LED3=%b.",
-						 key,LED1,LED2,LED4,LED3);
+		if (LED_error) begin
+			$display("Error ERROR state not changed when button pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+						 key,LED_locked,LED_error,LED_cp,LED_ep);
 			num_errors = num_errors + 1;
 		end
 	end
