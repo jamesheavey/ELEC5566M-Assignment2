@@ -18,13 +18,35 @@ module DigitalLock #(
 	parameter NUM_DISPLAYS = 6
 	
 )(
+	
+	(* chip_pin = "AF14" *) 
+	input clock, 
+	
+	(* chip_pin = "AB12" *) 
+	input reset,
 
-	input clock, reset,
-
+	(* chip_pin = "Y16, W15, AA15, AA14" *) 
 	input [3:0] key,
 	
-	output LED_locked, LED_error, LED_ep, LED_cp, LED_unlocked, LED_reset,
+	(* chip_pin = "V16" *) 
+	output LED_locked, 
 	
+	(* chip_pin = "W16" *) 
+	output LED_error, 
+	
+	(* chip_pin = "V17" *) 
+	output LED_ep, 
+	
+	(* chip_pin = "V18" *) 
+	output LED_cp, 
+	
+	(* chip_pin = "W17" *) 
+	output LED_unlocked, 
+	
+	(* chip_pin = "W19" *) 
+	output LED_reset,
+	
+	(* chip_pin = "AH28, AG28, AF28, AG27, AE28, AE27, AE26, AD27, AF30, AF29, AG30, AH30, AH29, AJ29, AC30, AC29, AD30, AC28, AD29, AE29, AB23, AB22, AB25, AB28, AC25, AD25, AC27, AD26, W25, V23, W24, W22, Y24, Y23, AA24, AA25, AA26, AB26, AB27, Y27, AA28, V25 " *) 
 	output [(7*NUM_DISPLAYS)-1:0] SevenSeg
 	
 ); 
