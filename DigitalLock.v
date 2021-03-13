@@ -56,17 +56,15 @@ module DigitalLock #(
 	
 ); 
 
-wire [3:0] not_key;
+
 wire [3:0] filtered_key;
 wire [(4*NUM_DISPLAYS)-1:0] display_digits;
-
-not(not_key, key);
 
 KeyPressFilter Filter (
 	
 	.clock				( clock ),
 	
-	.key					( not_key ),
+	.key					( ~key ),
 	
 	.posedge_key		( filtered_key )
 

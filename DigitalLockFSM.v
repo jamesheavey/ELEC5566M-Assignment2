@@ -140,6 +140,7 @@ always @(posedge clock or posedge reset) begin
 					temp_password[(4*PASSWORD_LENGTH)-1 - (4*key_presses) -: 4] <= key; // Does Password MSB first (easier to display on 7 Seg)
 					
 					display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
+					idle_counter <= 0;
 				
 				end else if (|key) begin
 					
@@ -147,6 +148,7 @@ always @(posedge clock or posedge reset) begin
 					password[(4*PASSWORD_LENGTH)-1 - (4*(key_presses-PASSWORD_LENGTH)) -: 4] <= key;
 					
 					display_digits <= password >> 4*(2*PASSWORD_LENGTH - key_presses);
+					idle_counter <= 0;
 					
 				end else begin
 					idle_counter <= idle_counter + 1;
@@ -187,6 +189,7 @@ always @(posedge clock or posedge reset) begin
 					key_presses <= key_presses + 1;
 					
 					display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
+					idle_counter <= 0;
 					
 				end else begin
 					idle_counter <= idle_counter + 1;
