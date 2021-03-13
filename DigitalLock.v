@@ -46,19 +46,27 @@ module DigitalLock #(
 	(* chip_pin = "W19" *) 
 	output LED_reset,
 	
-	(* chip_pin = "AH28, AG28, AF28, AG27, AE28, AE27, AE26, AD27, AF30, AF29, AG30, AH30, AH29, AJ29, AC30, AC29, AD30, AC28, AD29, AE29, AB23, AB22, AB25, AB28, AC25, AD25, AC27, AD26, W25, V23, W24, W22, Y24, Y23, AA24, AA25, AA26, AB26, AB27, Y27, AA28, V25 " *) 
+	(* chip_pin = {"AA25, AA26, AB26, AB27, Y27, AA28, V25,",
+					   "W25, V23, W24, W22, Y24, Y23, AA24,",
+					   "AB22, AB25, AB28, AC25, AD25, AC27, AD26,",
+					   "AC30, AC29, AD30, AC28, AD29, AE29, AB23,",
+					   "AD27, AF30, AF29, AG30, AH30, AH29, AJ29,",
+					   "AH28, AG28, AF28, AG27, AE28, AE27, AE26"} *) 			  
 	output [(7*NUM_DISPLAYS)-1:0] SevenSeg
 	
 ); 
 
+wire [3:0] not_key;
 wire [3:0] filtered_key;
 wire [(4*NUM_DISPLAYS)-1:0] display_digits;
+
+not(not_key, key);
 
 KeyPressFilter Filter (
 	
 	.clock				( clock ),
 	
-	.key					( key ),
+	.key					( not_key ),
 	
 	.posedge_key		( filtered_key )
 

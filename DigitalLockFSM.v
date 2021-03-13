@@ -18,7 +18,7 @@ module DigitalLockFSM #(
 
 	parameter PASSWORD_LENGTH = 4,
 	parameter NUM_DISPLAYS = 6,
-	parameter MAX_IDLE = 500000
+	parameter MAX_IDLE = 500000000
 	
 )(
 
@@ -92,7 +92,7 @@ always @(posedge clock or posedge reset) begin
 		temp_password <= RESET_PASSWORD;
 		key_presses <= 0;
 		idle_counter <= 0;
-		display_digits <= {(NUM_DISPLAYS*4){1'b0}};
+		display_digits <= {(PASSWORD_LENGTH){1'b0}};
 		  
 	end else if (idle_counter == MAX_IDLE) begin
 		
@@ -105,7 +105,7 @@ always @(posedge clock or posedge reset) begin
 		  
 			UNLOCKED: begin 
 				
-				display_digits <= {(NUM_DISPLAYS*4){1'b0}};
+				display_digits <= {(PASSWORD_LENGTH){1'b0}};
 		
 				if (|key) begin 
 				
@@ -156,7 +156,7 @@ always @(posedge clock or posedge reset) begin
 			
 			LOCKED: begin
 				
-				display_digits <= {(NUM_DISPLAYS*4){1'b0}}; // Display Nothing
+				display_digits <= {(PASSWORD_LENGTH){1'b0}}; // Display Nothing
 		
 				if (|key) begin 
 					state <= ENTER_PASSWORD;
