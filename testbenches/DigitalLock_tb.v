@@ -39,7 +39,7 @@ DigitalLock #(
 	.clock				( clock ),
 	.reset				( reset ),
 	
-	.key					( key ),
+	.key					( ~key ),
 	
 	.LED_locked			( LED_locked ),
 	.LED_error			( LED_error ),
@@ -85,7 +85,7 @@ always begin
 		alternator = 0;
 		
 		if (LED_error || LED_locked || LED_cp || LED_ep) begin
-			$display("Error FSM not set to UNLED1 state when reset button pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+			$display("Error FSM not set to UNLOCKED state when reset button pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
 						 key,LED_locked,LED_error,LED_cp,LED_ep);
 			num_errors = num_errors + 1;
 			
@@ -102,7 +102,7 @@ always begin
 		repeat(1) @(negedge clock);
 		
 		if (LED_cp) begin
-			$display("Error UNLED1 state changed when no buttons pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+			$display("Error UNLOCKED state changed when no buttons pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
 						 key,LED_locked,LED_error,LED_cp,LED_ep);
 			num_errors = num_errors + 1;
 		end 
@@ -111,7 +111,7 @@ always begin
 		repeat(1) @(negedge clock);
 		
 		if (!LED_cp) begin
-			$display("Error UNLED1 state not changed when button pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+			$display("Error UNLOCKED state not changed when button pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
 						 key,LED_locked,LED_error,LED_cp,LED_ep);
 			num_errors = num_errors + 1;
 			
@@ -181,7 +181,7 @@ always begin
 		repeat(1) @(negedge clock);
 		
 		if (LED_ep) begin
-			$display("Error LED_locked state changed when no buttons pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+			$display("Error LOCKED state changed when no buttons pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
 						 key,LED_locked,LED_error,LED_cp,LED_ep);
 			num_errors = num_errors + 1;
 		end 
@@ -190,7 +190,7 @@ always begin
 		repeat(1) @(negedge clock);
 		
 		if (!LED_ep) begin
-			$display("Error LED_locked state not changed when button pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
+			$display("Error LOCKED state not changed when button pressed. Inputs: key=%b. Outputs: LED_locked=%b, LED_error=%b, LED_cp=%b, LED_ep=%b.",
 						 key,LED_locked,LED_error,LED_cp,LED_ep);
 			num_errors = num_errors + 1;
 			
