@@ -16,7 +16,7 @@
 
 module DigitalLock #(
 
-	parameter PASSWORD_LENGTH = 8,
+	parameter PASSWORD_LENGTH = 5,
 	parameter NUM_DISPLAYS = 6,
 	parameter NUM_KEYS = 4
 	
