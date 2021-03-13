@@ -16,13 +16,19 @@
 
 module KeyPressFilter_tb;
 
+parameter NUM_KEYS = 4;
+
 reg clock;
 
 reg [3:0] key;
 
 wire [3:0] posedge_key;
 
-KeyPressFilter filter (
+KeyPressFilter #(
+
+	.NUM_KEYS			( NUM_KEYS )
+
+) filter (
 
 	.clock				( clock ),
 	
@@ -60,7 +66,7 @@ always begin
 	
 	key <= 4'hF;
 	
-	repeat(2) @(posedge clock);
+	repeat(6) @(posedge clock);
 	
 	$stop;
 	

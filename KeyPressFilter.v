@@ -12,13 +12,17 @@
  *
  */
 
-module KeyPressFilter (
+module KeyPressFilter #(
+	
+	parameter NUM_KEYS = 4
+
+)(
 
 	input clock,
 
-	input [3:0] key,
+	input [NUM_KEYS-1:0] key,
 
-	output [3:0] posedge_key
+	output [NUM_KEYS-1:0] posedge_key
 	
 ); 
 
