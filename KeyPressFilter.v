@@ -34,6 +34,6 @@ always @(posedge clock) begin
 
 end
 
-assign posedge_key = key & ~{(4){delay}};	
+assign posedge_key = key & ~{(NUM_KEYS){delay}};	
 
 endmodule

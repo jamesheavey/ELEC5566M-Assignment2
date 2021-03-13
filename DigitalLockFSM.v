@@ -36,6 +36,9 @@ reg [(4*PASSWORD_LENGTH)-1:0] password, temp_password;
 
 localparam RESET_PASSWORD = {((4*PASSWORD_LENGTH)-1){1'b0}};
 
+integer key_presses = 0;
+integer idle_counter = 0;
+
 reg [2:0] state;
 
 localparam	UNLOCKED 			= 3'd0,
@@ -43,9 +46,6 @@ localparam	UNLOCKED 			= 3'd0,
 				CREATE_PASSWORD 	= 3'd2,	
 				ENTER_PASSWORD 	= 3'd3,
 				ERROR 				= 3'd4;
-
-integer key_presses = 0;
-integer idle_counter = 0;
 
 
 always @(state) begin
@@ -66,12 +66,12 @@ always @(state) begin
 		  
 		CREATE_PASSWORD: begin 
 			create_pwd_flag = 1'b1;
-			lock_flag = 1'b0;
+			lock_flag = 1'b0;				
 		end
 	  
 		ENTER_PASSWORD: begin
 			enter_pwd_flag = 1'b1;
-			lock_flag = 1'b1;			
+			lock_flag = 1'b1;	
 		end
 		  
 		ERROR: begin
@@ -80,6 +80,32 @@ always @(state) begin
 		  
 	endcase
 	 
+end
+
+always @(password or temp_password) begin
+	
+	if (error_flag) begin
+		
+		display_digits = {(PASSWORD_LENGTH){4'hE}};
+		
+	end else if (create_pwd_flag) begin
+
+		if (key_presses < PASSWORD_LENGTH) begin
+			display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
+		end else begin
+			display_digits <= password >> 4*(2*PASSWORD_LENGTH - key_presses);
+		end
+	
+	end else if (enter_pwd_flag) begin
+		
+		display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
+	
+	end else begin
+		
+		display_digits <= {(PASSWORD_LENGTH){4'h0}}; // Display Nothing
+	
+	end
+
 end
 
 
@@ -92,7 +118,6 @@ always @(posedge clock or posedge reset) begin
 		temp_password <= RESET_PASSWORD;
 		key_presses <= 0;
 		idle_counter <= 0;
-		display_digits <= {(PASSWORD_LENGTH){1'b0}};
 		  
 	end else if (idle_counter == MAX_IDLE) begin
 		
@@ -104,17 +129,11 @@ always @(posedge clock or posedge reset) begin
 		case (state)
 		  
 			UNLOCKED: begin 
-				
-				display_digits <= {(PASSWORD_LENGTH){1'b0}};
 		
 				if (|key) begin 
-				
 					state <= CREATE_PASSWORD;
-					
 				end else begin
-				
 					state <= UNLOCKED;
-					
 				end
 			end
 			
@@ -136,18 +155,16 @@ always @(posedge clock or posedge reset) begin
 					
 				end else if ((|key) && (key_presses < PASSWORD_LENGTH)) begin
 				
-					key_presses <= key_presses + 1;
 					temp_password[(4*PASSWORD_LENGTH)-1 - (4*key_presses) -: 4] <= key; // Does Password MSB first (easier to display on 7 Seg)
 					
-					display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
+					key_presses <= key_presses + 1;
 					idle_counter <= 0;
 				
 				end else if (|key) begin
 					
-					key_presses <= key_presses + 1;
 					password[(4*PASSWORD_LENGTH)-1 - (4*(key_presses-PASSWORD_LENGTH)) -: 4] <= key;
 					
-					display_digits <= password >> 4*(2*PASSWORD_LENGTH - key_presses);
+					key_presses <= key_presses + 1;
 					idle_counter <= 0;
 					
 				end else begin
@@ -157,8 +174,6 @@ always @(posedge clock or posedge reset) begin
 			
 			
 			LOCKED: begin
-				
-				display_digits <= {(PASSWORD_LENGTH){1'b0}}; // Display Nothing
 		
 				if (|key) begin 
 					state <= ENTER_PASSWORD;
@@ -186,9 +201,8 @@ always @(posedge clock or posedge reset) begin
 				end else	if (|key) begin
 				
 					temp_password[(4*PASSWORD_LENGTH)-1 - (4*key_presses) -: 4] <= key;
-					key_presses <= key_presses + 1;
 					
-					display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
+					key_presses <= key_presses + 1;
 					idle_counter <= 0;
 					
 				end else begin
@@ -198,18 +212,16 @@ always @(posedge clock or posedge reset) begin
 			
 			
 			ERROR: begin
-				
-				display_digits <= {(PASSWORD_LENGTH){4'hE}};  // Display 'E' for ERROR
 			
 				if (|key) begin
-			
-					key_presses <= 0;
 				
 					if (lock_flag) begin
 						state <= LOCKED;
 					end else begin
 						state <= UNLOCKED;
 					end
+					
+					key_presses <= 0;
 					
 				end else begin
 				
@@ -220,7 +232,7 @@ always @(posedge clock or posedge reset) begin
 			
 					
 			default: begin
-				state <= UNLOCKED;
+				state <= ERROR;
 			end
 					
 		endcase
