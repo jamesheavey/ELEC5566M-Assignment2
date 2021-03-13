@@ -36,8 +36,10 @@ reg [(4*PASSWORD_LENGTH)-1:0] password, temp_password;
 
 localparam RESET_PASSWORD = {((4*PASSWORD_LENGTH)-1){1'b0}};
 
+
 integer key_presses = 0;
 integer idle_counter = 0;
+
 
 reg [2:0] state;
 
@@ -47,6 +49,7 @@ localparam	UNLOCKED 			= 3'd0,
 				ENTER_PASSWORD 	= 3'd3,
 				ERROR 				= 3'd4;
 
+reg [2:0] prev_state;
 
 always @(state) begin
 
@@ -82,38 +85,13 @@ always @(state) begin
 	 
 end
 
-always @(password or temp_password) begin
-	
-	if (error_flag) begin
-		
-		display_digits = {(PASSWORD_LENGTH){4'hE}};
-		
-	end else if (create_pwd_flag) begin
-
-		if (key_presses < PASSWORD_LENGTH) begin
-			display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
-		end else begin
-			display_digits <= password >> 4*(2*PASSWORD_LENGTH - key_presses);
-		end
-	
-	end else if (enter_pwd_flag) begin
-		
-		display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
-	
-	end else begin
-		
-		display_digits <= {(PASSWORD_LENGTH){4'h0}}; // Display Nothing
-	
-	end
-
-end
-
 
 always @(posedge clock or posedge reset) begin
 
 	if (reset) begin
 	  
 		state <= UNLOCKED;
+		prev_state <= UNLOCKED;
 		password <= RESET_PASSWORD;
 		temp_password <= RESET_PASSWORD;
 		key_presses <= 0;
@@ -139,6 +117,8 @@ always @(posedge clock or posedge reset) begin
 			
 					
 			CREATE_PASSWORD: begin 
+				
+				prev_state <= UNLOCKED;
 			
 				if (key_presses >= 2*PASSWORD_LENGTH) begin
 					
@@ -185,6 +165,8 @@ always @(posedge clock or posedge reset) begin
 			
 			ENTER_PASSWORD: begin
 				
+				prev_state <= LOCKED;
+				
 				if (key_presses >= PASSWORD_LENGTH) begin
 					
 					if (temp_password == password) begin
@@ -215,11 +197,7 @@ always @(posedge clock or posedge reset) begin
 			
 				if (|key) begin
 				
-					if (lock_flag) begin
-						state <= LOCKED;
-					end else begin
-						state <= UNLOCKED;
-					end
+					state <= prev_state;
 					
 					key_presses <= 0;
 					
@@ -239,6 +217,41 @@ always @(posedge clock or posedge reset) begin
 		
 	end
 	 
+end
+
+
+always @(password or temp_password) begin
+
+	if (reset) begin
+	
+		display_digits = {4'h5, 4'h3, 4'hD, 4'h3, 4'hE}; // Display 'rESEt'
+	
+	end else if (error_flag) begin
+		
+		display_digits = {4'h3, 4'h5, 4'h5, 4'h6, 4'h5}; // Display 'ErrOr'
+		
+	end else if (create_pwd_flag) begin
+
+		if (key_presses < PASSWORD_LENGTH) begin
+			display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
+		end else begin
+			display_digits <= password >> 4*(2*PASSWORD_LENGTH - key_presses);
+		end
+	
+	end else if (enter_pwd_flag) begin
+		
+		display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
+	
+	end else if (lock_flag) begin
+		
+		display_digits <= {4'hA, 4'h6, 4'hB, 4'hB, 4'h3, 4'hC}; // Display 'LOCCED'
+	
+	end else if (!lock_flag) begin
+		
+		display_digits <= {4'h7, 4'h9, 4'hA, 4'h6, 4'hB, 4'hC}; // Display 'UnLOCD'
+	
+	end
+
 end
 
 endmodule

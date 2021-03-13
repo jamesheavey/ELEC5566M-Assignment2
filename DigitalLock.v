@@ -8,13 +8,15 @@
  * Description
  * ---------------------------------
  * Top level file defining the function
- * of a digital lock with User interfacing
+ * of a digital lock with User interfacing.
+ * System designed for implementation on
+ * DE1-SoC Development Board
  *
  */
 
 module DigitalLock #(
 
-	parameter PASSWORD_LENGTH = 4,
+	parameter PASSWORD_LENGTH = 8,
 	parameter NUM_DISPLAYS = 6,
 	parameter NUM_KEYS = 4
 	
