@@ -12,17 +12,13 @@
  *
  */
 
-module KeyPressFilter #(
-	
-	parameter NUM_KEYS = 4
-
-)(
+module KeyPressFilter (
 
 	input clock,
 
-	input [NUM_KEYS-1:0] key,
+	input [3:0] key,
 
-	output [NUM_KEYS-1:0] posedge_key
+	output [3:0] posedge_key
 	
 ); 
 
@@ -34,6 +30,6 @@ always @(posedge clock) begin
 
 end
 
-assign posedge_key = key & ~{(NUM_KEYS){delay}};	
+assign posedge_key = key & ~{(4){delay}};	
 
 endmodule

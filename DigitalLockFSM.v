@@ -28,7 +28,7 @@ module DigitalLockFSM #(
 	
 	output reg lock_flag, error_flag, enter_pwd_flag, create_pwd_flag,
 	
-	output reg [(NUM_DISPLAYS*4)-1:0] display_digits
+	output reg [(4*NUM_DISPLAYS)-1:0] display_digits
 	
 ); 
 
@@ -41,7 +41,7 @@ integer key_presses = 0;
 integer idle_counter = 0;
 
 
-reg [2:0] state;
+reg [2:0] state, prev_state;
 
 localparam	UNLOCKED 			= 3'd0,
 				LOCKED 				= 3'd1,
@@ -49,7 +49,6 @@ localparam	UNLOCKED 			= 3'd0,
 				ENTER_PASSWORD 	= 3'd3,
 				ERROR 				= 3'd4;
 
-reg [2:0] prev_state;
 
 always @(state) begin
 

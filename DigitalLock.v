@@ -17,8 +17,7 @@
 module DigitalLock #(
 
 	parameter PASSWORD_LENGTH = 5,
-	parameter NUM_DISPLAYS = 6,
-	parameter NUM_KEYS = 4
+	parameter NUM_DISPLAYS = 6
 	
 )(
 	
@@ -59,15 +58,11 @@ module DigitalLock #(
 	
 ); 
 
+wire [4:0] filtered_key;
+wire [(4*NUM_DISPLAYS)-1:0] display_digits;
 
-wire [NUM_KEYS:0] filtered_key;
-wire [(NUM_KEYS*NUM_DISPLAYS)-1:0] display_digits;
 
-KeyPressFilter #(
-
-	.NUM_KEYS			( NUM_KEYS )
-	
-) Filter (
+KeyPressFilter Filter (
 	
 	.clock				( clock ),
 	
