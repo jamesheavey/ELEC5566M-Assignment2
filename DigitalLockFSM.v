@@ -48,7 +48,7 @@ reg [2:0] state, prev_state, sub_state;
 
 localparam	UNLOCKED 			= 3'd0,
 				LOCKED 				= 3'd1,
-				CREATE_PASSWORD 	= 3'd2,	
+				CREATE_PASSWORD 	= 3'd2,
 				ENTER_PASSWORD 	= 3'd3,
 				ERROR 				= 3'd4,
 				
@@ -127,7 +127,8 @@ always @(state) begin
 	
 end
 
-
+// Synchronous Sequential block representingthe state transitions of
+// the high level Digitla lock FSM
 always @(posedge clock or posedge reset) begin
 
 	if (reset) begin

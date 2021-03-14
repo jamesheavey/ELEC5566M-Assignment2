@@ -15,13 +15,13 @@
  */
 
 module DigitalLock #(
-
+	// Parameters
 	parameter PASSWORD_LENGTH = 5,
 	parameter NUM_DISPLAYS = 6,
 	parameter MAX_IDLE = 500000000
 	
 )(
-	
+	// Inputs
 	(* chip_pin = "AF14" *) 
 	input clock, 
 	
@@ -31,6 +31,7 @@ module DigitalLock #(
 	(* chip_pin = "Y16, W15, AA15, AA14" *) 
 	input [3:0] key,
 	
+	// Outputs
 	(* chip_pin = "V16" *) 
 	output LED_locked, 
 	
@@ -59,10 +60,12 @@ module DigitalLock #(
 	
 ); 
 
+// wires to connect instantiated sub-modules
 wire [3:0] filtered_key;
 wire [(4*NUM_DISPLAYS)-1:0] display_digits;
 
-
+// Module to filter the raw key input
+// outputs positive edge detection
 KeyPressFilter Filter (
 	
 	.clock				( clock ),
@@ -73,7 +76,9 @@ KeyPressFilter Filter (
 
 );
 
-
+// Synchronous Module representing the DigitalLock logic, recieves 
+// filtered key output and generates UI LED outputs, 
+// aswell as the digits to be displayed on the 7segments
 DigitalLockFSM #(
 
 	.PASSWORD_LENGTH	( PASSWORD_LENGTH ),
@@ -95,7 +100,9 @@ DigitalLockFSM #(
 	.display_digits	( display_digits )
 );
 
-
+// Asynchronous module to convert the output
+// hex display_digits from the FSM to 7 segment
+// display representation
 PasswordTo7Seg #(
 
 	.NUM_DISPLAYS		( NUM_DISPLAYS )
@@ -108,6 +115,7 @@ PasswordTo7Seg #(
 
 );
 
+// Final UI LED assignment
 assign LED_unlocked = ~LED_locked;
 assign LED_reset = reset;
 

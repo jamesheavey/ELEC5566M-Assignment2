@@ -24,12 +24,16 @@ module KeyPressFilter (
 
 reg delay;
 
+// delay the signal by 1 clock cycle
 always @(posedge clock) begin
-	
+
 	delay <= |key;
 
 end
 
-assign posedge_key = key & ~{(4){delay}};	
+// signal resulting from this operation remains high for 
+// one clock cycle when key trasitions high -> low, then 
+// returns low what the delayed signal also transitions
+assign posedge_key = key & ~{(4){delay}};
 
 endmodule
