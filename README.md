@@ -20,10 +20,7 @@ This repository includes the following files:
 ![HIERARCHY](https://github.com/leeds-embedded-systems/ELEC5566M-Assignment2-jamesheavey/blob/6cca6de2a3854d2b45c6a78d0e5444cad8d6c4b4/DEMO%20&%20DIAGRAMS/Assignment2ModuleHierarchy.png)
 
 ## Finite State Machine
-
-### Transition Diagram
-![FSM](https://github.com/leeds-embedded-systems/ELEC5566M-Assignment2-jamesheavey/blob/6cca6de2a3854d2b45c6a78d0e5444cad8d6c4b4/DEMO%20&%20DIAGRAMS/Assignment2StateMachine.png)
-
+![FSM](https://github.com/leeds-embedded-systems/ELEC5566M-Assignment2-jamesheavey/blob/f6622b21350074fc04de344a3500a411e6c64359/DEMO%20&%20DIAGRAMS/Assignment2StateMachine.png)
 
 ---
 
