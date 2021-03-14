@@ -7,7 +7,7 @@
  *
  * Description
  * ---------------------------------
- * 5-state Mealy state machine 
+ * 5-state Moore state machine 
  * defining the function of a 
  * digital lock, operating on the 
  * DE1-SoC Board
@@ -15,32 +15,35 @@
  */
 
 module DigitalLockFSM #(
-
+	// Parameters
 	parameter PASSWORD_LENGTH = 4,
 	parameter NUM_DISPLAYS = 6,
 	parameter MAX_IDLE = 500000000
 	
 )(
-
+	// Inputs
 	input clock, reset,
 
 	input [3:0] key,
 	
+	// Outputs
 	output reg lock_flag, error_flag, enter_pwd_flag, create_pwd_flag,
 	
 	output reg [(4*NUM_DISPLAYS)-1:0] display_digits
 	
 ); 
 
+// Registers to store save and input passwords
 reg [(4*PASSWORD_LENGTH)-1:0] password, temp_password;
 
 localparam RESET_PASSWORD = {((4*PASSWORD_LENGTH)-1){1'b0}};
 
-
+// Variables defining state transitions
 integer key_presses = 0;
 integer idle_counter = 0;
 integer num_pwd_entered = 0;
 
+// State registers
 reg [2:0] state, prev_state, sub_state;
 
 localparam	UNLOCKED 			= 3'd0,
@@ -53,38 +56,43 @@ localparam	UNLOCKED 			= 3'd0,
 				CHECK					= 3'd6,
 				RETURN_PASSWORD	= 3'd7;
 
-
-always @(temp_password) begin
+// Asynchronous Combinational block to update 7seg display digits
+// whenever the temporary password changes
+always @(temp_password or state or reset) begin
 
 	if (reset) begin
-	
-		display_digits = {4'h5, 4'h3, 4'hD, 4'h3, 4'hE}; // Display 'rESEt'
+		// Display 'rESEt' (assumes NUM_DISPLAYS == 6)
+		display_digits = {4'h5, 4'h3, 4'hD, 4'h3, 4'hE};
 	
 	end else begin
 	
 		case (state) 
-			
+			// Display 'ErrOr' (assumes NUM_DISPLAYS == 6)
 			ERROR: begin
-				display_digits = {4'h3, 4'h5, 4'h5, 4'h6, 4'h5}; // Display 'ErrOr'
+				display_digits = {4'h3, 4'h5, 4'h5, 4'h6, 4'h5};
 			end
 			
 			UNLOCKED: begin
-				display_digits <= {4'h7, 4'h9, 4'hA, 4'h6, 4'hB, 4'hC}; // Display 'UnLOCD'
+				// Display 'UnLOCD' (assumes NUM_DISPLAYS == 6)
+				display_digits <= {4'h7, 4'h9, 4'hA, 4'h6, 4'hB, 4'hC};
 			end
 			
 			LOCKED: begin
-				display_digits <= {4'hA, 4'h6, 4'hB, 4'hB, 4'h3, 4'hC}; // Display 'LOCCED'
+				// Display 'LOCCED' (assumes NUM_DISPLAYS == 6)
+				display_digits <= {4'hA, 4'h6, 4'hB, 4'hB, 4'h3, 4'hC};
 			end
 			
 			default begin
+				// Shift the password so that the current digit aligns with 7Seg[0]
 				display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
 			end
 			
 		endcase
 	end
 end
-				
 
+// Asynchronous Combinational block to update state flags
+// when the FSM state changes
 always @(state) begin
 
 	error_flag = 1'b0;
@@ -92,38 +100,38 @@ always @(state) begin
 	create_pwd_flag = 1'b0;
 
 	case (state)
- 
+
 		UNLOCKED: begin 
 			lock_flag = 1'b0;
 		end
-  
+		
 		LOCKED: begin 
 			lock_flag = 1'b1;
 		end
-		  
+		
 		CREATE_PASSWORD: begin 
 			create_pwd_flag = 1'b1;
-			lock_flag = 1'b0;				
+			lock_flag = 1'b0;
 		end
-	  
+		
 		ENTER_PASSWORD: begin
 			enter_pwd_flag = 1'b1;
 			lock_flag = 1'b1;	
 		end
-		  
+		
 		ERROR: begin
 			error_flag = 1'b1;
 		end
-		  
+		
 	endcase
-	 
+	
 end
 
 
 always @(posedge clock or posedge reset) begin
 
 	if (reset) begin
-	  
+		// reset all variables and state registers
 		state					<= UNLOCKED;
 		sub_state			<= ENTER_DIGIT;
 		prev_state			<= UNLOCKED;
@@ -134,7 +142,7 @@ always @(posedge clock or posedge reset) begin
 		num_pwd_entered	<= 0;
 		  
 	end else if (idle_counter == MAX_IDLE) begin
-		
+		// if idle count exceeds max, enter error state
 		state					<= ERROR;
 		idle_counter		<= 0;
 		
@@ -143,7 +151,7 @@ always @(posedge clock or posedge reset) begin
 		case (state)
 		  
 			UNLOCKED: begin 
-		
+				// wait in unlocked until any key is pressed
 				if (|key) begin 
 					state			<= CREATE_PASSWORD;
 				end else begin
@@ -153,15 +161,16 @@ always @(posedge clock or posedge reset) begin
 			
 					
 			CREATE_PASSWORD: begin 
-				
+				// save previous state to be used in ERROR state logic
 				prev_state <= UNLOCKED;
 				
-				input_password();
+				// enter sub-state machine
+				InputPassword();
 				
 				if (sub_state == RETURN_PASSWORD) begin
 					
 					if (num_pwd_entered == 0) begin
-					
+						// save the first password input
 						password <= temp_password;
 						num_pwd_entered	<= num_pwd_entered + 1;
 						
@@ -170,8 +179,10 @@ always @(posedge clock or posedge reset) begin
 						num_pwd_entered	<= 0;
 						
 						if (temp_password == password) begin
+							// if 1st password matches 2nd, enter LOCKED state
 							state 			<= LOCKED;
 						end else begin
+							// else enter ERROR state
 							state				<= ERROR;
 							password			<= RESET_PASSWORD;
 						end
@@ -186,7 +197,7 @@ always @(posedge clock or posedge reset) begin
 			
 			
 			LOCKED: begin
-		
+				// wait in locked until any key is pressed
 				if (|key) begin 
 					state			<= ENTER_PASSWORD;
 				end else begin
@@ -196,21 +207,23 @@ always @(posedge clock or posedge reset) begin
 			
 			
 			ENTER_PASSWORD: begin
-				
+				// save previous state to be used in ERROR state logic
 				prev_state <= LOCKED;
 				
-				input_password();
+				// enter sub-state machine
+				InputPassword();
 					
 				if (sub_state == RETURN_PASSWORD) begin
 				
 					if (password == temp_password) begin
-					
+						// if entered password matches saved password
+						// enter UNLOCKED state
 						state				<= UNLOCKED;
 						password			<= RESET_PASSWORD;
 						temp_password	<= RESET_PASSWORD;
 						
 					end else begin
-						
+						// else enter ERROR state
 						state 			<= ERROR;
 						temp_password	<= RESET_PASSWORD;
 						
@@ -222,9 +235,9 @@ always @(posedge clock or posedge reset) begin
 			
 			
 			ERROR: begin
-			
+				// wait in ERROR state until any key is pressed
 				if (|key) begin
-				
+					// return to state saved in previous state register
 					state			<= prev_state;
 					
 					key_presses	<= 0;
@@ -247,25 +260,29 @@ always @(posedge clock or posedge reset) begin
 	 
 end
 
-
-task input_password();
+// Second Level FSM to handle password inputs
+task InputPassword();
 	
 	case(sub_state)
 	
 		ENTER_DIGIT: begin
 			
 			if (|key) begin
-			
+				// if any key is pressed, save key state (4 bits) to
+				// temp password register. Key presses are recorded MSB first
+				// for easier representation on 7 segments
 				temp_password[(4*PASSWORD_LENGTH)-1 - (4*key_presses) -: 4] <= key;
 
 				key_presses 	<= key_presses + 1;
 				
+				// enter CHECK state
 				sub_state 		<= CHECK;
 				
+				// reset idle counter
 				idle_counter 	<= 0;
 				
 			end else begin
-			
+				
 				sub_state 		<= ENTER_DIGIT;
 				
 				idle_counter 	<= idle_counter+1;
@@ -276,19 +293,20 @@ task input_password();
 		CHECK: begin
 			
 			if (key_presses >= PASSWORD_LENGTH) begin
-			
+				// if user has input a sufficient number of keys
+				// return the password
 				sub_state 		<= RETURN_PASSWORD;
 				key_presses 	<= 0;
 				
 			end else begin
-			
+				// else return to ENTER_DIGIT state
 				sub_state 		<= ENTER_DIGIT;
 				
 			end
 		end
 			
 		RETURN_PASSWORD: begin
-			
+			// return to ENTER_DIGIT
 			sub_state	<= ENTER_DIGIT;
 			
 		end
