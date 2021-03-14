@@ -47,14 +47,14 @@ integer num_pwd_entered = 0;
 reg [2:0] state, prev_state, sub_state;
 
 localparam	UNLOCKED 			= 3'd0,
-				LOCKED 				= 3'd1,
-				CREATE_PASSWORD 	= 3'd2,
-				ENTER_PASSWORD 	= 3'd3,
-				ERROR 				= 3'd4,
+			LOCKED 				= 3'd1,
+			CREATE_PASSWORD 	= 3'd2,
+			ENTER_PASSWORD		= 3'd3,
+			ERROR 				= 3'd4,
 				
-				ENTER_DIGIT			= 3'd5,
-				CHECK					= 3'd6,
-				RETURN_PASSWORD	= 3'd7;
+			ENTER_DIGIT			= 3'd5,
+			CHECK				= 3'd6,
+			RETURN_PASSWORD		= 3'd7;
 
 // Asynchronous Combinational block to update 7seg display digits
 // whenever the temporary password changes
@@ -65,28 +65,18 @@ always @(temp_password or state or reset) begin
 		display_digits = {4'h5, 4'h3, 4'hD, 4'h3, 4'hE};
 	
 	end else begin
-	
 		case (state) 
 			// Display 'ErrOr' (assumes NUM_DISPLAYS == 6)
-			ERROR: begin
-				display_digits = {4'h3, 4'h5, 4'h5, 4'h6, 4'h5};
-			end
+			ERROR: display_digits = {4'h3, 4'h5, 4'h5, 4'h6, 4'h5};
 			
-			UNLOCKED: begin
-				// Display 'UnLOCD' (assumes NUM_DISPLAYS == 6)
-				display_digits <= {4'h7, 4'h9, 4'hA, 4'h6, 4'hB, 4'hC};
-			end
+			// Display 'UnLOCD' (assumes NUM_DISPLAYS == 6)
+			UNLOCKED: display_digits <= {4'h7, 4'h9, 4'hA, 4'h6, 4'hB, 4'hC};
 			
-			LOCKED: begin
-				// Display 'LOCCED' (assumes NUM_DISPLAYS == 6)
-				display_digits <= {4'hA, 4'h6, 4'hB, 4'hB, 4'h3, 4'hC};
-			end
+			// Display 'LOCCED' (assumes NUM_DISPLAYS == 6)
+			LOCKED: display_digits <= {4'hA, 4'h6, 4'hB, 4'hB, 4'h3, 4'hC};
 			
-			default begin
-				// Shift the password so that the current digit aligns with 7Seg[0]
-				display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
-			end
-			
+			// Shift the password so that the current digit aligns with 7Seg[0]
+			default: display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
 		endcase
 	end
 end
@@ -124,7 +114,6 @@ always @(state) begin
 		end
 		
 	endcase
-	
 end
 
 // Synchronous Sequential block representingthe state transitions of
@@ -133,37 +122,35 @@ always @(posedge clock or posedge reset) begin
 
 	if (reset) begin
 		// reset all variables and state registers
-		state					<= UNLOCKED;
+		state				<= UNLOCKED;
 		sub_state			<= ENTER_DIGIT;
 		prev_state			<= UNLOCKED;
-		password				<= RESET_PASSWORD;
+		password			<= RESET_PASSWORD;
 		temp_password		<= RESET_PASSWORD;
 		key_presses			<= 0;
 		idle_counter		<= 0;
-		num_pwd_entered	<= 0;
+		num_pwd_entered		<= 0;
 		  
 	end else if (idle_counter == MAX_IDLE) begin
 		// if idle count exceeds max, enter error state
-		state					<= ERROR;
-		idle_counter		<= 0;
+		state			<= ERROR;
+		idle_counter	<= 0;
 		
 	end else begin
-	 
 		case (state)
 		  
 			UNLOCKED: begin 
 				// wait in unlocked until any key is pressed
 				if (|key) begin 
-					state			<= CREATE_PASSWORD;
+					state		<= CREATE_PASSWORD;
 				end else begin
-					state			<= UNLOCKED;
+					state		<= UNLOCKED;
 				end
 			end
-			
 					
 			CREATE_PASSWORD: begin 
 				// save previous state to be used in ERROR state logic
-				prev_state <= UNLOCKED;
+				prev_state	<= UNLOCKED;
 				
 				// enter sub-state machine
 				InputPassword();
@@ -181,31 +168,28 @@ always @(posedge clock or posedge reset) begin
 						
 						if (temp_password == password) begin
 							// if 1st password matches 2nd, enter LOCKED state
-							state 			<= LOCKED;
+							state		<= LOCKED;
 						end else begin
 							// else enter ERROR state
-							state				<= ERROR;
-							password			<= RESET_PASSWORD;
+							state		<= ERROR;
+							password	<= RESET_PASSWORD;
 						end
 						
 					end 
 					
-					temp_password		<= RESET_PASSWORD;
+					temp_password	<= RESET_PASSWORD;
 					
 				end
-		
 			end
-			
 			
 			LOCKED: begin
 				// wait in locked until any key is pressed
 				if (|key) begin 
-					state			<= ENTER_PASSWORD;
+					state	<= ENTER_PASSWORD;
 				end else begin
-					state			<= LOCKED;
+					state	<= LOCKED;
 				end
 			end
-			
 			
 			ENTER_PASSWORD: begin
 				// save previous state to be used in ERROR state logic
@@ -219,8 +203,8 @@ always @(posedge clock or posedge reset) begin
 					if (password == temp_password) begin
 						// if entered password matches saved password
 						// enter UNLOCKED state
-						state				<= UNLOCKED;
-						password			<= RESET_PASSWORD;
+						state			<= UNLOCKED;
+						password		<= RESET_PASSWORD;
 						temp_password	<= RESET_PASSWORD;
 						
 					end else begin
@@ -229,9 +213,7 @@ always @(posedge clock or posedge reset) begin
 						temp_password	<= RESET_PASSWORD;
 						
 					end
-					
 				end
-
 			end
 			
 			
@@ -239,13 +221,13 @@ always @(posedge clock or posedge reset) begin
 				// wait in ERROR state until any key is pressed
 				if (|key) begin
 					// return to state saved in previous state register
-					state			<= prev_state;
+					state		<= prev_state;
 					
 					key_presses	<= 0;
 					
 				end else begin
 				
-					state <= ERROR;
+					state 		<= ERROR;
 					
 				end
 			end
@@ -274,7 +256,7 @@ task InputPassword();
 				// for easier representation on 7 segments
 				temp_password[(4*PASSWORD_LENGTH)-1 - (4*key_presses) -: 4] <= key;
 
-				key_presses 	<= key_presses + 1;
+				key_presses		<= key_presses + 1;
 				
 				// enter CHECK state
 				sub_state 		<= CHECK;

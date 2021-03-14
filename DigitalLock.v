@@ -70,7 +70,7 @@ KeyPressFilter Filter (
 	
 	.clock				( clock ),
 	
-	.key					( ~key ),
+	.key				( ~key ),
 	
 	.posedge_key		( filtered_key )
 
@@ -90,14 +90,14 @@ DigitalLockFSM #(
 	.clock				( clock ),
 	.reset				( reset ),
 	
-	.key					( filtered_key ),
+	.key				( filtered_key ),
 	
 	.lock_flag			( LED_locked ),
 	.error_flag			( LED_error ),
-	.enter_pwd_flag	( LED_ep ),
+	.enter_pwd_flag		( LED_ep ),
 	.create_pwd_flag	( LED_cp ),
 	
-	.display_digits	( display_digits )
+	.display_digits		( display_digits )
 );
 
 // Asynchronous module to convert the output
