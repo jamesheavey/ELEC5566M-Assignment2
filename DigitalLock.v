@@ -83,17 +83,17 @@ DigitalLockFSM #(
 
 	.PASSWORD_LENGTH	( PASSWORD_LENGTH ),
 	.NUM_DISPLAYS		( NUM_DISPLAYS ),
-	.MAX_IDLE			( MAX_IDLE )
+	.MAX_IDLE		( MAX_IDLE )
 	
 ) FSM (
 
-	.clock				( clock ),
-	.reset				( reset ),
+	.clock			( clock ),
+	.reset			( reset ),
 	
-	.key				( filtered_key ),
+	.key			( filtered_key ),
 	
-	.lock_flag			( LED_locked ),
-	.error_flag			( LED_error ),
+	.lock_flag		( LED_locked ),
+	.error_flag		( LED_error ),
 	.enter_pwd_flag		( LED_ep ),
 	.create_pwd_flag	( LED_cp ),
 	
@@ -109,9 +109,9 @@ PasswordTo7Seg #(
 	
 ) SevenSegments (
 	
-	.password			( display_digits ),
+	.password		( display_digits ),
 	
-	.seven_seg			( seven_seg )
+	.seven_seg		( seven_seg )
 
 );
 
