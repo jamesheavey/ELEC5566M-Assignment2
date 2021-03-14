@@ -17,7 +17,8 @@
 module DigitalLock #(
 
 	parameter PASSWORD_LENGTH = 5,
-	parameter NUM_DISPLAYS = 6
+	parameter NUM_DISPLAYS = 6,
+	parameter MAX_IDLE = 500000000
 	
 )(
 	
@@ -76,7 +77,8 @@ KeyPressFilter Filter (
 DigitalLockFSM #(
 
 	.PASSWORD_LENGTH	( PASSWORD_LENGTH ),
-	.NUM_DISPLAYS		( NUM_DISPLAYS )
+	.NUM_DISPLAYS		( NUM_DISPLAYS ),
+	.MAX_IDLE			( MAX_IDLE )
 	
 ) FSM (
 
@@ -106,7 +108,7 @@ PasswordTo7Seg #(
 
 );
 
-assign LED_unlocked = ~ LED_locked;
+assign LED_unlocked = ~LED_locked;
 assign LED_reset = reset;
 
 endmodule

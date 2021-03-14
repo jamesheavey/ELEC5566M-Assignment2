@@ -47,6 +47,7 @@ DigitalLockFSM #(
 );
 
 localparam RST_CYCLES = 2;
+localparam WAIT_CYCLES = 2;
 localparam MAX_CYCLES = 50;
 
 // Initialise Clock
@@ -113,19 +114,19 @@ always begin
 	else if (!error_flag && !lock_flag && create_pwd_flag && !enter_pwd_flag) begin
 	
 		key = 4'h0;
-		repeat(1) @(negedge clock);
+		repeat(WAIT_CYCLES) @(negedge clock);
 	
 		if (!alternator) begin
 			if (counter < 2*PASSWORD_LENGTH) begin
 			
 				key = counter + 1;
-				repeat(1) @(negedge clock);
+				repeat(WAIT_CYCLES) @(negedge clock);
 				
 				counter = counter + 1;
 			end else begin
 			
 				key = 4'h0;
-				repeat(1) @(negedge clock);
+				repeat(WAIT_CYCLES) @(negedge clock);
 				
 				if (!error_flag) begin
 					$display("Error CREATE_PASSWORD state not changed to ERROR when non-identical passwords entered. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
@@ -143,14 +144,14 @@ always begin
 			if (counter < 2*PASSWORD_LENGTH) begin
 			
 				key = 4'hF;
-				repeat(1) @(negedge clock);
+				repeat(WAIT_CYCLES) @(negedge clock);
 				
 				counter = counter + 1;
 				
 			end else begin
 			
 				key = 4'h0;
-				repeat(1) @(negedge clock);
+				repeat(WAIT_CYCLES) @(negedge clock);
 				
 				if (create_pwd_flag) begin
 					$display("Error CREATE_PASSWORD state not changed when identical passwords entered. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
@@ -191,20 +192,20 @@ always begin
 	else if (!error_flag && lock_flag && !create_pwd_flag && enter_pwd_flag) begin
 	
 		key = 4'h0;
-		repeat(1) @(negedge clock);
+		repeat(WAIT_CYCLES) @(negedge clock);
 	
 		if (!alternator) begin
 		
 			if (counter < PASSWORD_LENGTH) begin
 				key = 4'd7;
-				repeat(1) @(negedge clock);
+				repeat(WAIT_CYCLES) @(negedge clock);
 				
 				counter = counter + 1;
 				
 			end else begin
 				
 				key = 4'h0;
-				repeat(1) @(negedge clock);
+				repeat(WAIT_CYCLES) @(negedge clock);
 				
 				if (!error_flag) begin
 					$display("Error ENTER_PASSWORD state not changed to ERROR when incorrect password entered. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",
@@ -222,14 +223,14 @@ always begin
 			if (counter < PASSWORD_LENGTH) begin
 			
 				key = 4'hF;
-				repeat(1) @(negedge clock);
+				repeat(WAIT_CYCLES) @(negedge clock);
 				
 				counter = counter + 1;
 				
 			end else begin
 				
 				key = 4'h0;
-				repeat(1) @(negedge clock);
+				repeat(WAIT_CYCLES) @(negedge clock);
 
 				if (enter_pwd_flag) begin
 					$display("Error ENTER_PASSWORD state not changed when correct password entered. Inputs: key=%b. Outputs: lock_flag=%b, error_flag=%b, create_pwd_flag=%b, enter_pwd_flag=%b.",

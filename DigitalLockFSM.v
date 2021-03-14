@@ -41,6 +41,18 @@ integer key_presses = 0;
 integer idle_counter = 0;
 integer num_pwd_entered = 0;
 
+reg [2:0] state, prev_state, sub_state;
+
+localparam	UNLOCKED 			= 3'd0,
+				LOCKED 				= 3'd1,
+				CREATE_PASSWORD 	= 3'd2,	
+				ENTER_PASSWORD 	= 3'd3,
+				ERROR 				= 3'd4,
+				
+				ENTER_DIGIT			= 3'd5,
+				CHECK					= 3'd6,
+				RETURN_PASSWORD	= 3'd7;
+
 
 always @(temp_password) begin
 
@@ -71,19 +83,6 @@ always @(temp_password) begin
 		endcase
 	end
 end
-
-
-reg [2:0] state, prev_state, sub_state;
-
-localparam	UNLOCKED 			= 3'd0,
-				LOCKED 				= 3'd1,
-				CREATE_PASSWORD 	= 3'd2,	
-				ENTER_PASSWORD 	= 3'd3,
-				ERROR 				= 3'd4,
-				
-				ENTER_DIGIT			= 3'd5,
-				CHECK					= 3'd6,
-				RETURN_PASSWORD	= 3'd7;
 				
 
 always @(state) begin
