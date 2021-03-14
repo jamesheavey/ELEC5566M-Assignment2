@@ -53,7 +53,7 @@ set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name STATE_MACHINE_PROCESSING "USER-ENCODED"
 set_global_assignment -name EDA_TEST_BENCH_ENABLE_STATUS TEST_BENCH_MODE -section_id eda_simulation
-set_global_assignment -name EDA_NATIVELINK_SIMULATION_TEST_BENCH DigitalLock_tb -section_id eda_simulation
+set_global_assignment -name EDA_NATIVELINK_SIMULATION_TEST_BENCH DigitalLockFSM_tb -section_id eda_simulation
 set_global_assignment -name EDA_TEST_BENCH_NAME DigitalLock_tb -section_id eda_simulation
 set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id DigitalLock_tb
 set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME DigitalLock_tb -section_id DigitalLock_tb
@@ -71,11 +71,11 @@ set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME KeyPressFilter_tb -sectio
 set_global_assignment -name EDA_TEST_BENCH_NAME PasswordTo7Seg_tb -section_id eda_simulation
 set_global_assignment -name EDA_DESIGN_INSTANCE_NAME NA -section_id PasswordTo7Seg_tb
 set_global_assignment -name EDA_TEST_BENCH_MODULE_NAME PasswordTo7Seg_tb -section_id PasswordTo7Seg_tb
-set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
-set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
-set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_global_assignment -name EDA_TEST_BENCH_FILE testbenches/DigitalLock_tb.v -section_id DigitalLock_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE testbenches/DigitalLockFSM_tb.v -section_id DigitalLockFSM_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE testbenches/KeyPressFilter_tb.v -section_id KeyPressFilter_tb
 set_global_assignment -name EDA_TEST_BENCH_FILE testbenches/PasswordTo7Seg_tb.v -section_id PasswordTo7Seg_tb
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

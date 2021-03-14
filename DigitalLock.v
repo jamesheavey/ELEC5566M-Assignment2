@@ -58,7 +58,7 @@ module DigitalLock #(
 	
 ); 
 
-wire [4:0] filtered_key;
+wire [3:0] filtered_key;
 wire [(4*NUM_DISPLAYS)-1:0] display_digits;
 
 

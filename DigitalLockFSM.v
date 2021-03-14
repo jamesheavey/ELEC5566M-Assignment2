@@ -39,16 +39,48 @@ localparam RESET_PASSWORD = {((4*PASSWORD_LENGTH)-1){1'b0}};
 
 integer key_presses = 0;
 integer idle_counter = 0;
+integer num_pwd_entered = 0;
 
 
-reg [2:0] state, prev_state;
+always @(password or temp_password) begin
+
+	if (reset) begin
+	
+		display_digits = {4'h5, 4'h3, 4'hD, 4'h3, 4'hE}; // Display 'rESEt'
+	
+	end else if (error_flag) begin
+		
+		display_digits = {4'h3, 4'h5, 4'h5, 4'h6, 4'h5}; // Display 'ErrOr'
+		
+	end else if (create_pwd_flag || enter_pwd_flag) begin
+		
+		display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
+	
+	end else if (lock_flag) begin
+		
+		display_digits <= {4'hA, 4'h6, 4'hB, 4'hB, 4'h3, 4'hC}; // Display 'LOCCED'
+	
+	end else if (!lock_flag) begin
+		
+		display_digits <= {4'h7, 4'h9, 4'hA, 4'h6, 4'hB, 4'hC}; // Display 'UnLOCD'
+	
+	end
+
+end
+
+
+reg [2:0] state, prev_state, sub_state;
 
 localparam	UNLOCKED 			= 3'd0,
 				LOCKED 				= 3'd1,
 				CREATE_PASSWORD 	= 3'd2,	
 				ENTER_PASSWORD 	= 3'd3,
-				ERROR 				= 3'd4;
-
+				ERROR 				= 3'd4,
+				
+				ENTER_DIGIT			= 3'd5,
+				CHECK					= 3'd6,
+				RETURN_PASSWORD	= 3'd7;
+				
 
 always @(state) begin
 
@@ -90,11 +122,13 @@ always @(posedge clock or posedge reset) begin
 	if (reset) begin
 	  
 		state <= UNLOCKED;
+		sub_state <= ENTER_DIGIT;
 		prev_state <= UNLOCKED;
 		password <= RESET_PASSWORD;
 		temp_password <= RESET_PASSWORD;
 		key_presses <= 0;
 		idle_counter <= 0;
+		num_pwd_entered <= 0;
 		  
 	end else if (idle_counter == MAX_IDLE) begin
 		
@@ -118,37 +152,33 @@ always @(posedge clock or posedge reset) begin
 			CREATE_PASSWORD: begin 
 				
 				prev_state <= UNLOCKED;
-			
-				if (key_presses >= 2*PASSWORD_LENGTH) begin
+				
+				input_password();
+				
+				if (sub_state == RETURN_PASSWORD) begin
 					
-					if (temp_password == password) begin
-						state <= LOCKED;
+					if (num_pwd_entered == 0) begin
+					
+						password <= temp_password;
+						num_pwd_entered <= num_pwd_entered + 1;
+						
 					end else begin
-						state <= ERROR;
-						password <= RESET_PASSWORD;
-					end
+					
+						num_pwd_entered <= 0;
+						
+						if (temp_password == password) begin
+							state <= LOCKED;
+						end else begin
+							state <= ERROR;
+							password <= RESET_PASSWORD;
+						end
+						
+					end 
 					
 					temp_password <= RESET_PASSWORD;
-					key_presses <= 0;
-					idle_counter <= 0;
 					
-				end else if ((|key) && (key_presses < PASSWORD_LENGTH)) begin
-				
-					temp_password[(4*PASSWORD_LENGTH)-1 - (4*key_presses) -: 4] <= key; // Does Password MSB first (easier to display on 7 Seg)
-					
-					key_presses <= key_presses + 1;
-					idle_counter <= 0;
-				
-				end else if (|key) begin
-					
-					password[(4*PASSWORD_LENGTH)-1 - (4*(key_presses-PASSWORD_LENGTH)) -: 4] <= key;
-					
-					key_presses <= key_presses + 1;
-					idle_counter <= 0;
-					
-				end else begin
-					idle_counter <= idle_counter + 1;
-				end	
+				end
+		
 			end
 			
 			
@@ -166,29 +196,25 @@ always @(posedge clock or posedge reset) begin
 				
 				prev_state <= LOCKED;
 				
-				if (key_presses >= PASSWORD_LENGTH) begin
+				input_password();
 					
-					if (temp_password == password) begin
+				if (sub_state == RETURN_PASSWORD) begin
+				
+					if (password == temp_password) begin
+					
 						state <= UNLOCKED;
 						password <= RESET_PASSWORD;
+						temp_password <= RESET_PASSWORD;
+						
 					end else begin
+						
 						state <= ERROR;
+						temp_password <= RESET_PASSWORD;
+						
 					end
 					
-					temp_password <= RESET_PASSWORD;
-					key_presses <= 0;
-					idle_counter <= 0;
-					
-				end else	if (|key) begin
-				
-					temp_password[(4*PASSWORD_LENGTH)-1 - (4*key_presses) -: 4] <= key;
-					
-					key_presses <= key_presses + 1;
-					idle_counter <= 0;
-					
-				end else begin
-					idle_counter <= idle_counter + 1;
 				end
+
 			end
 			
 			
@@ -219,38 +245,57 @@ always @(posedge clock or posedge reset) begin
 end
 
 
-always @(password or temp_password) begin
-
-	if (reset) begin
+task input_password();
 	
-		display_digits = {4'h5, 4'h3, 4'hD, 4'h3, 4'hE}; // Display 'rESEt'
+	case(sub_state)
 	
-	end else if (error_flag) begin
-		
-		display_digits = {4'h3, 4'h5, 4'h5, 4'h6, 4'h5}; // Display 'ErrOr'
-		
-	end else if (create_pwd_flag) begin
+		ENTER_DIGIT: begin
+			
+			if (|key) begin
+			
+				temp_password[(4*PASSWORD_LENGTH)-1 - (4*key_presses) -: 4] <= key;
 
-		if (key_presses < PASSWORD_LENGTH) begin
-			display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
-		end else begin
-			display_digits <= password >> 4*(2*PASSWORD_LENGTH - key_presses);
+				key_presses <= key_presses + 1;
+				
+				sub_state <= CHECK;
+				
+				idle_counter <= 0;
+				
+			end else begin
+			
+				sub_state <= ENTER_DIGIT;
+				
+				idle_counter <= idle_counter+1;
+			
+			end
 		end
-	
-	end else if (enter_pwd_flag) begin
+			
+		CHECK: begin
+			
+			if (key_presses >= PASSWORD_LENGTH) begin
+			
+				sub_state <= RETURN_PASSWORD;
+				key_presses <= 0;
+				
+			end else begin
+			
+				sub_state <= ENTER_DIGIT;
+				
+			end
+		end
+			
+		RETURN_PASSWORD: begin
+			
+			sub_state <= ENTER_DIGIT;
+			
+		end
+			
+		default: begin
+			sub_state <= ENTER_DIGIT;
+		end
 		
-		display_digits <= temp_password >> 4*(PASSWORD_LENGTH - key_presses);
-	
-	end else if (lock_flag) begin
-		
-		display_digits <= {4'hA, 4'h6, 4'hB, 4'hB, 4'h3, 4'hC}; // Display 'LOCCED'
-	
-	end else if (!lock_flag) begin
-		
-		display_digits <= {4'h7, 4'h9, 4'hA, 4'h6, 4'hB, 4'hC}; // Display 'UnLOCD'
-	
-	end
+	endcase
 
-end
+endtask
 
 endmodule
