@@ -29,17 +29,17 @@ genvar i;
 
 generate 
 
-// generate a HexTo7Seg converter for each available display
+	// generate a HexTo7Seg converter for each available display
 	for (i = 0; i < NUM_DISPLAYS; i = i + 1) begin : SevenSeg_loop
 
 		HexTo7Seg display (
-			.hex			( password[(i*4)+:4] ),
+			.hex		( password[(i*4)+:4] ),
 			.SevenSeg	( seven_seg[(i*7)+:7] )
 		);
 		
 	end 
 
 endgenerate
-
+	
 endmodule
 	
