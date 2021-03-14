@@ -20,7 +20,7 @@ module PasswordTo7Seg #(
 
 	input [(4*NUM_DISPLAYS)-1:0] password,
 	
-	output [(7*NUM_DISPLAYS)-1:0] SevenSeg
+	output [(7*NUM_DISPLAYS)-1:0] seven_seg
 	
 );
 
@@ -30,9 +30,9 @@ generate
 
 	for (i = 0; i < NUM_DISPLAYS; i = i + 1) begin : SevenSeg_loop
 
-		HexTo7Segment display (
+		HexTo7Seg display (
 			.hex			( password[(i*4)+:4] ),
-			.SevenSeg	( SevenSeg[(i*7)+:7] )
+			.SevenSeg	( seven_seg[(i*7)+:7] )
 		);
 		
 	end 

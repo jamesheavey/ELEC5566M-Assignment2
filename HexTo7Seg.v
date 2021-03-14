@@ -12,7 +12,7 @@
  *
  */
  
-module HexTo7Segment ( 
+module HexTo7Seg ( 
 
 	input			[3:0] hex, 
 	output reg	[6:0] SevenSeg

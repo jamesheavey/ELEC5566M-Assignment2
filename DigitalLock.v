@@ -54,7 +54,7 @@ module DigitalLock #(
 					   "AC30, AC29, AD30, AC28, AD29, AE29, AB23,",
 					   "AD27, AF30, AF29, AG30, AH30, AH29, AJ29,",
 					   "AH28, AG28, AF28, AG27, AE28, AE27, AE26"} *) 			  
-	output [(7*NUM_DISPLAYS)-1:0] SevenSeg
+	output [(7*NUM_DISPLAYS)-1:0] seven_seg
 	
 ); 
 
@@ -102,7 +102,7 @@ PasswordTo7Seg #(
 	
 	.password			( display_digits ),
 	
-	.SevenSeg			( SevenSeg )
+	.seven_seg			( seven_seg )
 
 );
 
