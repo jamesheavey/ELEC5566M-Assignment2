@@ -33,7 +33,7 @@ module DigitalLockFSM #(
 	
 ); 
 
-// Registers to store save and input passwords
+// Registers to store saved and temporary input passwords
 reg [(4*PASSWORD_LENGTH)-1:0] password, temp_password;
 
 localparam RESET_PASSWORD = {((4*PASSWORD_LENGTH)-1){1'b0}};
@@ -116,8 +116,8 @@ always @(state) begin
 	endcase
 end
 
-// Synchronous Sequential block representingthe state transitions of
-// the high level Digitla lock FSM
+// Synchronous Sequential block representing the state transitions of
+// the high level Digital lock FSM
 always @(posedge clock or posedge reset) begin
 
 	if (reset) begin

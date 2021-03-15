@@ -16,19 +16,13 @@
 
 module KeyPressFilter_tb;
 
-parameter NUM_KEYS = 4;
-
 reg clock;
 
 reg [3:0] key;
 
 wire [3:0] posedge_key;
 
-KeyPressFilter #(
-
-	.NUM_KEYS			( NUM_KEYS )
-
-) filter (
+KeyPressFilter filter (
 
 	.clock				( clock ),
 	
