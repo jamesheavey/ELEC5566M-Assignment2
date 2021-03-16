@@ -34,7 +34,7 @@ always @(posedge clock) begin
 end
 
 // signal resulting from this operation remains high for 
-// one clock cycle when key trasitions low -> high, then 
+// one clock cycle when key transitions low -> high, then 
 // returns low what the delayed signal also transitions
 assign posedge_key = key & ~{(4){delay}};
 

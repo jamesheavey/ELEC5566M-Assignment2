@@ -22,7 +22,7 @@ reg clock;
 
 reg [(4*NUM_DISPLAYS)-1:0] password;
 
-wire [(7*NUM_DISPLAYS)-1:0] SevenSeg;
+wire [(7*NUM_DISPLAYS)-1:0] seven_seg;
 
 PasswordTo7Seg #(
 	
@@ -31,7 +31,7 @@ PasswordTo7Seg #(
 ) PasswordTo7Seg_dut (
 	
 	.password	( password ),
-	.SevenSeg	( SevenSeg )
+	.seven_seg	( seven_seg )
 	
 );
 
