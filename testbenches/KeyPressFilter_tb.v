@@ -24,10 +24,10 @@ wire [3:0] posedge_key;
 
 KeyPressFilter filter (
 
-	.clock				( clock ),
+	.clock		( clock ),
 	
-	.key					( key ),
-	.posedge_key		( posedge_key )
+	.key		( key ),
+	.posedge_key	( posedge_key )
 	
 );
 
