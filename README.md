@@ -24,17 +24,24 @@ This is a Moore Finite State Machine with a single Mealy reset input. Each state
 
 ### Transition Diagrams
 
-#### Top Level Digital Lock FSM
+#### Top Level Digital Lock
 ![FSM](https://github.com/leeds-embedded-systems/ELEC5566M-Assignment2-jamesheavey/blob/f6622b21350074fc04de344a3500a411e6c64359/DEMO%20&%20DIAGRAMS/Assignment2StateMachine.png)
 
 #### Input Password Sub-FSM
-![subFSM](https://github.com/leeds-embedded-systems/ELEC5566M-Assignment2-jamesheavey/blob/bc68406a6abf9b49e913f7c6af4152ef0162e9b6/DEMO%20&%20DIAGRAMS/Assignment2SubStateMachine.png)
+![subFSM](https://github.com/leeds-embedded-systems/ELEC5566M-Assignment2-jamesheavey/blob/ca90d314f8ff4fd4f803478f44547f30f42d4918/DEMO%20&%20DIAGRAMS/Assignment2StateMachine.png)
 
 This FSM is used to record key presses in both the CREATE_PASSWORD and the ENTER_PASSWORD states in the top level FSM. In the CREATE_PASSWORD state it is used twice, once for the first password input, then again for the second.
 
-### Digital Lock State Table
-![State Table](https://github.com/leeds-embedded-systems/ELEC5566M-Assignment2-jamesheavey/blob/a2e5bcf47cadbac6ad48bd6dcb6d61edc7a45dc1/DEMO%20&%20DIAGRAMS/StateTable.png)
+### State Tables
 
+#### Digital Lock State Table
+![State Table](https://github.com/leeds-embedded-systems/ELEC5566M-Assignment2-jamesheavey/blob/ca90d314f8ff4fd4f803478f44547f30f42d4918/DEMO%20&%20DIAGRAMS/DigitalLockStateTable.png)
+
+#### Digital Lock Output Table
+![OutTable](https://github.com/leeds-embedded-systems/ELEC5566M-Assignment2-jamesheavey/blob/ca90d314f8ff4fd4f803478f44547f30f42d4918/DEMO%20&%20DIAGRAMS/DigitalLockOutputTable.png)
+
+#### Input Password State Table
+![IPTable](https://github.com/leeds-embedded-systems/ELEC5566M-Assignment2-jamesheavey/blob/ca90d314f8ff4fd4f803478f44547f30f42d4918/DEMO%20&%20DIAGRAMS/PasswordInputStateTable.png)
 
 ---
 
