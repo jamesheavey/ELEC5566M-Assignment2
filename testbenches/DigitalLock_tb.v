@@ -34,23 +34,23 @@ DigitalLock #(
 
 	.PASSWORD_LENGTH	( PASSWORD_LENGTH ),
 	.NUM_DISPLAYS		( NUM_DISPLAYS ),
-	.MAX_IDLE			( MAX_IDLE )
+	.MAX_IDLE		( MAX_IDLE )
 	
 ) DigitalLock_dut (
 
-	.clock				( clock ),
-	.reset				( reset ),
+	.clock			( clock ),
+	.reset			( reset ),
 	
-	.key					( ~key ),
+	.key			( ~key ),
 	
-	.LED_locked			( LED_locked ),
-	.LED_error			( LED_error ),
-	.LED_ep				( LED_ep ),
-	.LED_cp				( LED_cp ),
+	.LED_locked		( LED_locked ),
+	.LED_error		( LED_error ),
+	.LED_ep			( LED_ep ),
+	.LED_cp			( LED_cp ),
 	.LED_unlocked		( LED_unlocked ),
-	.LED_reset			( LED_reset ),
+	.LED_reset		( LED_reset ),
 	
-	.seven_seg			( seven_seg )
+	.seven_seg		( seven_seg )
 	
 );
 
