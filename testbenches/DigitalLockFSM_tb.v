@@ -30,18 +30,18 @@ wire lock_flag, error_flag, enter_pwd_flag, create_pwd_flag;
 DigitalLockFSM #(
 
 	.PASSWORD_LENGTH	( PASSWORD_LENGTH ),
-	.MAX_IDLE			( MAX_IDLE )
+	.MAX_IDLE		( MAX_IDLE )
 	
 ) DigitalLockFSM_dut (
 
-	.clock				( clock ),
-	.reset				( reset ),
+	.clock			( clock ),
+	.reset			( reset ),
 	
-	.key					( key ),
+	.key			( key ),
 	
-	.lock_flag			( lock_flag ),
-	.error_flag			( error_flag ),
-	.enter_pwd_flag	( enter_pwd_flag ),
+	.lock_flag		( lock_flag ),
+	.error_flag		( error_flag ),
+	.enter_pwd_flag		( enter_pwd_flag ),
 	.create_pwd_flag	( create_pwd_flag )
 	
 );
