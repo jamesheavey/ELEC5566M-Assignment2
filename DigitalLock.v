@@ -68,9 +68,9 @@ wire [(4*NUM_DISPLAYS)-1:0] display_digits;
 // outputs positive edge detection
 KeyPressFilter Filter (
 	
-	.clock				( clock ),
+	.clock			( clock ),
 	
-	.key				( ~key ),
+	.key			( ~key ),
 	
 	.posedge_key		( filtered_key )
 
