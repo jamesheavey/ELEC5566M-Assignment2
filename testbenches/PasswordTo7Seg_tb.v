@@ -26,12 +26,12 @@ wire [(7*NUM_DISPLAYS)-1:0] SevenSeg;
 
 PasswordTo7Seg #(
 	
-	.NUM_DISPLAYS		( NUM_DISPLAYS )
+	.NUM_DISPLAYS	( NUM_DISPLAYS )
 
 ) PasswordTo7Seg_dut (
 	
-	.password			( password ),
-	.SevenSeg			( SevenSeg )
+	.password	( password ),
+	.SevenSeg	( SevenSeg )
 	
 );
 
