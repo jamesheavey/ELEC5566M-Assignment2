@@ -119,7 +119,7 @@ always begin
 		if (!alternator) begin
 			if (counter < 2*PASSWORD_LENGTH) begin
 			
-				key = counter + 1;
+				key = ($urandom % 14) + 1;
 				repeat(WAIT_CYCLES) @(negedge clock);
 				
 				counter = counter + 1;
@@ -197,7 +197,7 @@ always begin
 		if (!alternator) begin
 		
 			if (counter < PASSWORD_LENGTH) begin
-				key = 4'd7;
+				key = ($urandom % 14) + 1;
 				repeat(WAIT_CYCLES) @(negedge clock);
 				
 				counter = counter + 1;
